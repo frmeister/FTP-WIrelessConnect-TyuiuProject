@@ -29,22 +29,21 @@ namespace UDP_BroadcastHandler
 
                 Debug.WriteLine($"[DEBUG] : Получено от {remote.Address}: {msg}");
 
-                // Handler(remote.Address, msg);
+                Echo(remote.Address, msg);
             }
         }
 
-        public static string Handler(IPAddress remote, string msg)
+        public static void Echo(IPAddress remote, string msg)
         {
-            string adress = "";
+
 
             if (msg == "HELLO WRLSSUPDCONNECT:KEY_123")
             {
-                adress = Convert.ToString(remote.ToString());
 
-                Debug.WriteLine($"[DEBUG] : Конвертирую полученный адрес");
+                
+
             }
 
-            return adress;
         }
 
     }

@@ -1,23 +1,27 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace UDP_BroadcastHandler
 {
     public class UDP_Parser
     {
-        public static List<IPAddress> GetLocalIPv4Addresses()
-        {
-            var addresses = new List<IPAddress>();
-            var host = Dns.GetHostEntry(Dns.GetHostName());
+        int port = 8888;
+        IPAddress broadcast = IPAddress.Broadcast;
+        UdpClient sender = new UdpClient();
 
-            foreach (var ip in host.AddressList)
-            {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) 
-                {
-                    addresses.Add(ip);
-                }
-            }
-            return addresses;
+        static string message = "HELLO";
+
+        // Тут должен быть код 
+
+        public void Send_message(IPAddress ip, string msg)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(msg);
+
+            Debug.WriteLine($"[DEBUG] : Отправляяю {msg} на адрес {ip.ToString()}");
+
+            sender.Send(data, data.Length, ip.ToString(), port);
         }
     }
 }
