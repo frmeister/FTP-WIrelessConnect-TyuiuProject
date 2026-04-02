@@ -12,6 +12,10 @@ namespace UDP_BroadcastHandler
     public class UDP_Reciever
     {
         // Debug.WriteLine($"[DEBUG] : ///);
+
+        public static List<IPAddress> connected_clients = new List<IPAddress>();
+        public static bool Is_ClientReciever = false;
+
         public static void Listener()
         {
             int port = 8888;
@@ -40,7 +44,34 @@ namespace UDP_BroadcastHandler
             if (msg == "HELLO WRLSSUPDCONNECT:KEY_123")
             {
 
+                UDP_Parser.Send_message(remote, "ECHO WRLSSUPDCONNECT:KEY_123");
+
+                UDP_Controller.GetNew_Client(remote);
+
+            }
+
+            if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
+            {
+
+                UDP_Controller.GetNew_Client(remote);
                 
+            }
+
+            if (msg == "CHECK WRLSSUPDCONNECT:KEY_123")
+            {
+
+                UDP_Parser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
+
+                connected_clients.Add(remote);
+                
+                Is_ClientReciever = true;
+
+            }
+
+            if (msg == "ECHO_CHECK WRLSSUPDCONNECT:KEY_123")
+            {
+
+                connected_clients.Add(remote);
 
             }
 

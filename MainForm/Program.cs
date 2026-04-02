@@ -18,6 +18,8 @@ namespace MainForm
             while (true)
             {
                 UDP_BroadcastHandler.UDP_Reciever.Listener();
+
+                UDP_BroadcastHandler.UDP_Controller.Is_Online();
             }
         }
     }

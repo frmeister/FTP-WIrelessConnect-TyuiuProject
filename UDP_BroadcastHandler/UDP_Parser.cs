@@ -7,15 +7,15 @@ namespace UDP_BroadcastHandler
 {
     public class UDP_Parser
     {
-        int port = 8888;
+        static int port = 8888;
         IPAddress broadcast = IPAddress.Broadcast;
-        UdpClient sender = new UdpClient();
+        static UdpClient sender = new UdpClient();
 
         static string message = "HELLO";
 
         // Тут должен быть код 
 
-        public void Send_message(IPAddress ip, string msg)
+        public static void Send_message(IPAddress ip, string msg)
         {
             byte[] data = Encoding.UTF8.GetBytes(msg);
 
