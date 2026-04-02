@@ -48,6 +48,8 @@ namespace UDP_BroadcastHandler
 
                 UDP_Controller.GetNew_Client(remote);
 
+                Is_ClientReciever = true;
+
             }
 
             if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
@@ -63,8 +65,6 @@ namespace UDP_BroadcastHandler
                 UDP_Parser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
 
                 connected_clients.Add(remote);
-                
-                Is_ClientReciever = true;
 
             }
 
