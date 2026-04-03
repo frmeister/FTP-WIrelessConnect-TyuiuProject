@@ -14,8 +14,17 @@ namespace UDP_BroadcastHandler
         // Debug.WriteLine($"[DEBUG] : ///);
 
         public static List<IPAddress> connected_clients = new List<IPAddress>();
+        private static readonly HashSet<IPAddress> _localAddresses = new();
+
         public static bool Is_ClientReciever = true;
         public static bool IsRunning = true;
+
+        static UDP_Reciever()
+        {
+
+            RefreshLocalAddresses();
+
+        }
 
         public static void Listener()
         {
@@ -34,6 +43,12 @@ namespace UDP_BroadcastHandler
                     byte[] data = listener.Receive(ref remote);
                     string msg = Encoding.UTF8.GetString(data);
 
+                    if (IsLocalAddress(remote.Address))
+                    {
+                        Debug.WriteLine($"[DEBUG] : Пропускаю свой пакет: {msg}");
+                        continue;
+                    }
+
                     Debug.WriteLine($"[DEBUG] : Получено от {remote.Address}: {msg}");
 
                     Echo(remote.Address, msg);
@@ -43,6 +58,35 @@ namespace UDP_BroadcastHandler
                     Debug.WriteLine($"[DEBUG] : Ошибка в прослушивании... ");
                 }
             }
+        }
+
+        public static void RefreshLocalAddresses()
+        {
+            _localAddresses.Clear();
+
+            // loopback всегда свой
+            _localAddresses.Add(IPAddress.Loopback);
+
+            try
+            {
+                // получаем ВСЕ локальные IP (может быть несколько сетевых интерфейсов)
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    _localAddresses.Add(ip);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[DEBUG] : Ошибка получения локальных IP: {ex.Message}");
+            }
+
+            Debug.WriteLine($"[DEBUG] : Локальные адреса: {string.Join(", ", _localAddresses)}");
+        }
+
+        public static bool IsLocalAddress(IPAddress address)
+        {
+            return _localAddresses.Contains(address);
         }
 
         public static void Echo(IPAddress remote, string msg)
@@ -65,7 +109,7 @@ namespace UDP_BroadcastHandler
                 }
             }
 
-            if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
+            else if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
             {
 
                 if (!UDP_Controller.clients.Contains(remote))
@@ -75,7 +119,7 @@ namespace UDP_BroadcastHandler
 
             }
 
-            if (msg == "CHECK WRLSSUPDCONNECT:KEY_123")
+            else if (msg == "CHECK WRLSSUPDCONNECT:KEY_123")
             {
 
                 UDP_Parser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
@@ -85,7 +129,7 @@ namespace UDP_BroadcastHandler
                 }
             }
 
-            if (msg == "ECHO_CHECK WRLSSUPDCONNECT:KEY_123")
+            else if (msg == "ECHO_CHECK WRLSSUPDCONNECT:KEY_123")
             {
 
                 lock (connected_clients)

@@ -7,18 +7,22 @@ namespace MainForm
 {
     public partial class MainForm_Welcome : Form
     {
+        System.Windows.Forms.Timer uiTimer = new System.Windows.Forms.Timer();
+
         public MainForm_Welcome()
         {
             InitializeComponent();
 
-            onGoingHandler();
+            uiTimer.Interval = 500; // каждые 0.5 сек
+            uiTimer.Tick += UiTimer_Tick;
+            uiTimer.Start();
         }
 
-        private void onGoingHandler()
+        private void UiTimer_Tick(object sender, EventArgs e)
         {
-            while (true)
+            if (!UDP_Reciever.Is_ClientReciever)
             {
-                if (!UDP_BroadcastHandler.UDP_Reciever.Is_ClientReciever) main_buttonParse.Enabled = false;
+                main_buttonParse.Enabled = false;
             }
         }
 
