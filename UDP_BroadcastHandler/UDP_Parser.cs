@@ -11,13 +11,19 @@ namespace UDP_BroadcastHandler
         IPAddress broadcast = IPAddress.Broadcast;
         static UdpClient sender = new UdpClient();
 
-        static string message = "HELLO";
+        public static void Broadcast(string msg)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(msg);
 
-        // Тут должен быть код 
+            sender.EnableBroadcast = true;
+
+            sender.Send(data, data.Length, new IPEndPoint(IPAddress.Broadcast, port));
+        }
 
         public static void Send_message(IPAddress ip, string msg)
         {
             byte[] data = Encoding.UTF8.GetBytes(msg);
+            sender.EnableBroadcast = false;
 
             Debug.WriteLine($"[DEBUG] : Отправляяю {msg} на адрес {ip.ToString()}");
 

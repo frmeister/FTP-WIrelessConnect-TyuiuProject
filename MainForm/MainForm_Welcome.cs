@@ -18,7 +18,7 @@ namespace MainForm
         {
             while (true)
             {
-                if (UDP_BroadcastHandler.UDP_Reciever.Is_ClientReciever) main_buttonParse.Enabled = false;
+                if (!UDP_BroadcastHandler.UDP_Reciever.Is_ClientReciever) main_buttonParse.Enabled = false;
             }
         }
 
@@ -29,6 +29,8 @@ namespace MainForm
 
         private void main_buttonParse_Click(object sender, EventArgs e)
         {
+            UDP_Parser.Broadcast("HELLO WRLSSUPDCONNECT:KEY_123");
+
             List<IPAddress> IP_list = UDP_BroadcastHandler.UDP_Controller.clients;
 
             foreach (IPAddress ip in IP_list)

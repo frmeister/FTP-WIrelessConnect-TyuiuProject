@@ -19,7 +19,11 @@ namespace UDP_BroadcastHandler
 
         public static void GetNew_Client(IPAddress ip)
         {
-            clients.Add(ip);
+            lock (clients)
+            {
+                if (!clients.Contains(ip))
+                    clients.Add(ip);
+            }
         }
 
         public static void Is_Online()
@@ -32,16 +36,22 @@ namespace UDP_BroadcastHandler
 
         private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            if (clients.Count == 0) return;
-
-            Debug.WriteLine($"[DEBUG] : Прошел таймер. Проверяю все ли на месте...");
-
-            foreach (IPAddress ip in clients)
+            lock (clients)
             {
+                if (clients.Count == 0) return;
 
-                UDP_Parser.Send_message(ip, "CHECK WRLSSUPDCONNECT:KEY_123");
+                Debug.WriteLine($"[DEBUG] : Прошел таймер. Проверяю все ли на месте...");
 
+                UDP_Reciever.connected_clients.Clear();
+
+                foreach (IPAddress ip in clients)
+                {
+
+                    UDP_Parser.Send_message(ip, "CHECK WRLSSUPDCONNECT:KEY_123");
+
+                }
             }
+            Thread.Sleep(1000); // дать время ответить
 
             Is_Connected();
 
@@ -50,16 +60,18 @@ namespace UDP_BroadcastHandler
 
         public static void Is_Connected()
         {
-
-            // Все клиенты на месте
-            if (UDP_Reciever.connected_clients == clients)
-                return;
-
-            else
+            lock (clients)
             {
-                old_clients = clients;
-                clients = UDP_Reciever.connected_clients;
-            }    
+                // Все клиенты на месте
+                if (UDP_Reciever.connected_clients.SequenceEqual(clients))
+                    return;
+
+                else
+                {
+                    old_clients = clients;
+                    clients = UDP_Reciever.connected_clients;
+                }
+            }
         }
 
     }
