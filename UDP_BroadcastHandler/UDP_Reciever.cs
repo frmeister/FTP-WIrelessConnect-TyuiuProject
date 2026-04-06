@@ -86,7 +86,8 @@ namespace UDP_BroadcastHandler
 
         public static bool IsLocalAddress(IPAddress address)
         {
-            return _localAddresses.Contains(address);
+            //return _localAddresses.Contains(address);
+            return false;
         }
 
         public static void Echo(IPAddress remote, string msg)
