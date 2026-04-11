@@ -9,7 +9,7 @@ namespace UDP_BroadcastHandler
     {
         static int port = 8888;
         IPAddress broadcast = IPAddress.Broadcast;
-        static UdpClient sender = new UdpClient();
+        static UdpClient sender = new UdpClient(); // 255.255.255.255 <- IP.Sender
 
         public static void Broadcast(string msg)
         {

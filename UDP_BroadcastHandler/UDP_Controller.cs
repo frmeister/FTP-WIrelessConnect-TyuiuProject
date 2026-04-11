@@ -42,7 +42,7 @@ namespace UDP_BroadcastHandler
 
                 Debug.WriteLine($"[DEBUG] : Прошел таймер. Проверяю все ли на месте...");
 
-                UDP_Reciever.connected_clients.Clear();
+                UDP_Responser.connected_clients.Clear();
 
                 foreach (IPAddress ip in clients)
                 {
@@ -63,13 +63,13 @@ namespace UDP_BroadcastHandler
             lock (clients)
             {
                 // Все клиенты на месте
-                if (UDP_Reciever.connected_clients.SequenceEqual(clients))
+                if (UDP_Responser.connected_clients.SequenceEqual(clients))
                     return;
 
                 else
                 {
                     old_clients = clients;
-                    clients = UDP_Reciever.connected_clients;
+                    clients = UDP_Responser.connected_clients;
                 }
             }
         }

@@ -11,9 +11,7 @@ namespace UDP_BroadcastHandler
 {
     public class UDP_Reciever
     {
-        // Debug.WriteLine($"[DEBUG] : ///);
-
-        public static List<IPAddress> connected_clients = new List<IPAddress>();
+        // Debug.WriteLine($"[DEBUG] : ///");
         private static readonly HashSet<IPAddress> _localAddresses = new();
 
         public static bool Is_ClientReciever = true;
@@ -51,7 +49,7 @@ namespace UDP_BroadcastHandler
 
                     Debug.WriteLine($"[DEBUG] : Получено от {remote.Address}: {msg}");
 
-                    Echo(remote.Address, msg);
+                    UDP_Responser.Echo(remote.Address, msg);
                 }
                 catch (SocketException)
                 {
@@ -86,70 +84,8 @@ namespace UDP_BroadcastHandler
 
         public static bool IsLocalAddress(IPAddress address)
         {
-            //return _localAddresses.Contains(address);
-            return false;
-        }
-
-        public static void Echo(IPAddress remote, string msg)
-        {
-
-
-            if (msg == "HELLO WRLSSUPDCONNECT:KEY_123")
-            {
-
-                if (Is_ClientReciever)
-                {
-                    UDP_Parser.Send_message(remote, "ECHO WRLSSUPDCONNECT:KEY_123");
-                    UDP_Controller.GetNew_Client(remote);
-
-                    // send message (otpravitel)
-
-                    Is_ClientReciever = false;
-
-                    // func poluchenia
-                }
-            }
-
-            else if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
-            {
-
-                if (!UDP_Controller.clients.Contains(remote))
-                {
-                    UDP_Controller.GetNew_Client(remote);
-                }
-
-            }
-
-            else if (msg == "CHECK WRLSSUPDCONNECT:KEY_123")
-            {
-
-                UDP_Parser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
-                lock (connected_clients)
-                {
-                    connected_clients.Add(remote);
-                }
-            }
-
-            else if (msg == "ECHO_CHECK WRLSSUPDCONNECT:KEY_123")
-            {
-
-                lock (connected_clients)
-                {
-                    connected_clients.Add(remote);
-                }
-
-            }
-
-            //
-
-            // Лог случайного пакета
-            else
-            {
-                Debug.WriteLine($"[DEBUG] : Неизвестный пакет от {remote}: {msg}");
-            }
-
-            // priem paket "PAKET :::::"
-
+            return _localAddresses.Contains(address);
+            // return false;
         }
 
     }
