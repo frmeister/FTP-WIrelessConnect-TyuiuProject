@@ -5,7 +5,7 @@ using System.Text;
 
 namespace UDP_BroadcastHandler
 {
-    public class UDP_Parser
+    public class NetworkParser
     {
         static int port = 8888;
         IPAddress broadcast = IPAddress.Broadcast;

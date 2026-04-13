@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace UDP_BroadcastHandler
 {
-    public class UDP_Controller
+    public class NetworkController
     {
         static Timer timer = new Timer(10000);
         public static List<IPAddress> clients = new List<IPAddress>();
@@ -42,12 +42,12 @@ namespace UDP_BroadcastHandler
 
                 Debug.WriteLine($"[DEBUG] : Прошел таймер. Проверяю все ли на месте...");
 
-                UDP_Responser.connected_clients.Clear();
+                NetworkResponser.connected_clients.Clear();
 
                 foreach (IPAddress ip in clients)
                 {
 
-                    UDP_Parser.Send_message(ip, "CHECK WRLSSUPDCONNECT:KEY_123");
+                    NetworkParser.Send_message(ip, "CHECK WRLSSUPDCONNECT:KEY_123");
 
                 }
             }
@@ -63,13 +63,13 @@ namespace UDP_BroadcastHandler
             lock (clients)
             {
                 // Все клиенты на месте
-                if (UDP_Responser.connected_clients.SequenceEqual(clients))
+                if (NetworkResponser.connected_clients.SequenceEqual(clients))
                     return;
 
                 else
                 {
                     old_clients = clients;
-                    clients = UDP_Responser.connected_clients;
+                    clients = NetworkResponser.connected_clients;
                 }
             }
         }

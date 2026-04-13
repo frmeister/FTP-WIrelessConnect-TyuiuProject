@@ -38,7 +38,6 @@
             main_buttonParse = new Button();
             groupBoxStatus = new GroupBox();
             comboBox_ListIPs = new ComboBox();
-            main_textBoxListIPs = new TextBox();
             labelStatus = new TextBox();
             groupBoxData = new GroupBox();
             textBoxReceivedContent = new TextBox();
@@ -127,7 +126,6 @@
             // groupBoxStatus
             // 
             groupBoxStatus.Controls.Add(comboBox_ListIPs);
-            groupBoxStatus.Controls.Add(main_textBoxListIPs);
             groupBoxStatus.Controls.Add(labelStatus);
             groupBoxStatus.Dock = DockStyle.Top;
             groupBoxStatus.Location = new Point(154, 0);
@@ -141,23 +139,14 @@
             // 
             // comboBox_ListIPs
             // 
+            comboBox_ListIPs.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             comboBox_ListIPs.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_ListIPs.FormattingEnabled = true;
-            comboBox_ListIPs.Location = new Point(847, 17);
+            comboBox_ListIPs.Location = new Point(847, 21);
             comboBox_ListIPs.Name = "comboBox_ListIPs";
             comboBox_ListIPs.Size = new Size(193, 23);
             comboBox_ListIPs.TabIndex = 4;
             comboBox_ListIPs.SelectedIndexChanged += comboBox_ListIPs_SelectedIndexChanged;
-            // 
-            // main_textBoxListIPs
-            // 
-            main_textBoxListIPs.Dock = DockStyle.Right;
-            main_textBoxListIPs.Location = new Point(847, 18);
-            main_textBoxListIPs.Margin = new Padding(3, 2, 3, 2);
-            main_textBoxListIPs.Name = "main_textBoxListIPs";
-            main_textBoxListIPs.Size = new Size(196, 23);
-            main_textBoxListIPs.TabIndex = 7;
-            main_textBoxListIPs.Visible = false;
             // 
             // labelStatus
             // 
@@ -230,7 +219,6 @@
         private OpenFileDialog openFileDialog;
         private SaveFileDialog saveFileDialog;
         private Button buttonSend;
-        private TextBox main_textBoxListIPs;
         private ComboBox comboBox_ListIPs;
     }
 }

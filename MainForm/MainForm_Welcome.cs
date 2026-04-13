@@ -17,6 +17,7 @@ namespace MainForm
         public MainForm_Welcome()
         {
             InitializeComponent();
+            InitializeTrayIcon();
             comboBox_ListIPs_onInit();
 
             fileSender = new FileSender();
@@ -27,6 +28,8 @@ namespace MainForm
             uiTimer.Tick += UiTimer_Tick;
             uiTimer.Start();
 
+            this.Resize += FormMain_Resize;
+
             openFileDialog.Filter = "Все файлы (*.*)|*.*";
             saveFileDialog.Filter = "Все файлы (*.*)|*.*";
         }
@@ -35,14 +38,13 @@ namespace MainForm
 
         private void main_buttonParse_Click(object sender, EventArgs e)
         {
-            main_textBoxListIPs.Clear();
-            UDP_Parser.Broadcast("HELLO WRLSSUPDCONNECT:KEY_123");
+            NetworkParser.Broadcast("HELLO WRLSSUPDCONNECT:KEY_123");
 
             Task.Delay(500).ContinueWith(_ =>
             {
                 this.Invoke(new Action(() =>
                 {
-                    List<IPAddress> IP_list = UDP_BroadcastHandler.UDP_Controller.clients;
+                    List<IPAddress> IP_list = UDP_BroadcastHandler.NetworkController.clients;
 
                     if (IP_list.Count == 0)
                     {
@@ -54,7 +56,6 @@ namespace MainForm
 
                         foreach (IPAddress ip in IP_list)
                         {
-                            main_textBoxListIPs.AppendText(ip.ToString() + Environment.NewLine);
                             comboBox_ListIPs.Items.Add(ip.ToString());
                         }
 
@@ -147,8 +148,7 @@ namespace MainForm
             textBoxReceivedContent.Clear();
             labelStatus.Text = "";
             fileReceiver.ResetReceiver();
-            main_textBoxListIPs.Clear();
-            UDP_Reciever.Is_ClientReciever = true;
+            NetworkReciever.Is_ClientReciever = true;
             main_buttonParse.Enabled = true;
         }
 
@@ -158,7 +158,7 @@ namespace MainForm
 
         private void UiTimer_Tick(object sender, EventArgs e)
         {
-            if (!UDP_Reciever.Is_ClientReciever)
+            if (!NetworkReciever.Is_ClientReciever)
             {
                 main_buttonParse.Enabled = false;
             }
@@ -192,6 +192,85 @@ namespace MainForm
             comboBox_ListIPs.Items.Clear();
             comboBox_ListIPs.Items.Add("Клинтов нет");
             comboBox_ListIPs.Enabled = false;
+        }
+
+        #endregion
+
+        #region TRAY
+
+        private NotifyIcon trayIcon;
+        private ContextMenuStrip trayMenu;
+
+        private void InitializeTrayIcon()
+        {
+            // Создаем контекстное меню для трея
+            trayMenu = new ContextMenuStrip();
+            trayMenu.Items.Add("Open", null, OnTrayRestore);
+            trayMenu.Items.Add(new ToolStripSeparator());
+            trayMenu.Items.Add("Exit", null, OnTrayExit);
+
+            // Создаем иконку в трее
+            trayIcon = new NotifyIcon
+            {
+                Icon = SystemIcons.Application, // Можно заменить на свою иконку
+                Text = "ProgramConnectionPrikol",
+                ContextMenuStrip = trayMenu,
+                Visible = false // Изначально скрыта
+            };
+
+            // Обработка кликов по иконке
+            trayIcon.DoubleClick += (s, e) => RestoreFromTray();
+            trayIcon.MouseClick += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    RestoreFromTray();
+                }
+            };
+        }
+
+        private void RestoreFromTray()
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            trayIcon.Visible = false;
+            this.Activate(); // Активируем окно
+        }
+
+        private void MinimizeToTray()
+        {
+            this.Hide();
+            this.ShowInTaskbar = false;
+            trayIcon.Visible = true;
+        }
+
+        private void OnTrayRestore(object sender, EventArgs e)
+        {
+            RestoreFromTray();
+        }
+
+        private bool isExitingFromTray = false;
+
+        private async void OnTrayExit(object sender, EventArgs e)
+        {
+            isExitingFromTray = true;
+
+            // !!! ДОБАВИТЬ ПРОВЕРКУ НА РАБОТУ ПРОЦЕССОВ ПЕРЕД ЗАКРЫТИЕМ !!!
+            // !!! ИНАЧЕ ПИЗДА И ОШИБКА ВСЕМУ НАХУЙ !!!
+
+            // Корректно закрываем приложение
+            trayIcon.Visible = false;
+            Application.Exit();
+        }
+
+        private void FormMain_Resize(object sender, EventArgs e)
+        {
+            // Сворачиваем в трей при нажатии на кнопку "минус"
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                MinimizeToTray();
+            }
         }
 
         #endregion

@@ -10,15 +10,22 @@ namespace MainForm
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
+  
+
             ApplicationConfiguration.Initialize();
 
-            // Чтобы выключить слушалку
-            // UDP_Reciever.IsRunning = false;
+            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            string appDirectory = Path.GetDirectoryName(exePath);
+            Directory.SetCurrentDirectory(appDirectory);
 
-            Task.Run(() => UDP_Reciever.Listener());
-            Task.Run(() => UDP_Controller.Is_Online());
+            // BODY --->
+            
+            ConfigManager.Initialize(appDirectory);
+
+            NetworkResponser.Initialize(ConfigManager.GetValue("appKey"));
+
+            Task.Run(() => NetworkReciever.Listener());
+            Task.Run(() => NetworkController.Is_Online());
 
             Application.Run(new MainForm_Welcome());
         }

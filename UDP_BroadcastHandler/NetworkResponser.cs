@@ -8,10 +8,17 @@ using System.Threading.Tasks;
 
 namespace UDP_BroadcastHandler
 {
-    public class UDP_Responser
+    public class NetworkResponser
     {
         public static List<IPAddress> connected_clients = new List<IPAddress>();
         public static bool Is_ClientReciever = false;
+
+        private static string appKey;
+
+        public static void Initialize(string value)
+        {
+            appKey = value;
+        }
 
         public static void Echo(IPAddress remote, string msg)
         {
@@ -25,12 +32,12 @@ namespace UDP_BroadcastHandler
                 KEY - Ключ для того чтобы отличить клиента от любого иного запроса на этом же порту (подразумевается измеенение с версией приложения)
             */
 
-            if (msg == "HELLO WRLSSUPDCONNECT:KEY_123")
+            if (msg == $"HELLO WRLSSUPDCONNECT:KEY_123")
             {
                 if (Is_ClientReciever)
                 {
-                    UDP_Parser.Send_message(remote, "ECHO WRLSSUPDCONNECT:KEY_123");
-                    UDP_Controller.GetNew_Client(remote);
+                    NetworkParser.Send_message(remote, "ECHO WRLSSUPDCONNECT:KEY_123");
+                    NetworkController.GetNew_Client(remote);
 
                     Is_ClientReciever = true;
                 }
@@ -39,9 +46,9 @@ namespace UDP_BroadcastHandler
             else if (msg == "ECHO WRLSSUPDCONNECT:KEY_123")
             {
 
-                if (!UDP_Controller.clients.Contains(remote))
+                if (!NetworkController.clients.Contains(remote))
                 {
-                    UDP_Controller.GetNew_Client(remote);
+                    NetworkController.GetNew_Client(remote);
                 }
 
             }
@@ -49,7 +56,7 @@ namespace UDP_BroadcastHandler
             else if (msg == "CHECK WRLSSUPDCONNECT:KEY_123")
             {
 
-                UDP_Parser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
+                NetworkParser.Send_message(remote, "ECHO_CHECK WRLSSUPDCONNECT:KEY_123");
                 lock (connected_clients)
                 {
                     connected_clients.Add(remote);

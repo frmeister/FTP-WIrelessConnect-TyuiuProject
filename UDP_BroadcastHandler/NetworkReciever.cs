@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace UDP_BroadcastHandler
 {
-    public class UDP_Reciever
+    public class NetworkReciever
     {
         // Debug.WriteLine($"[DEBUG] : ///");
         private static readonly HashSet<IPAddress> _localAddresses = new();
@@ -17,7 +17,7 @@ namespace UDP_BroadcastHandler
         public static bool Is_ClientReciever = true;
         public static bool IsRunning = true;
 
-        static UDP_Reciever()
+        static NetworkReciever()
         {
 
             RefreshLocalAddresses();
@@ -49,7 +49,7 @@ namespace UDP_BroadcastHandler
 
                     Debug.WriteLine($"[DEBUG] : Получено от {remote.Address}: {msg}");
 
-                    UDP_Responser.Echo(remote.Address, msg);
+                    NetworkResponser.Echo(remote.Address, msg);
                 }
                 catch (SocketException)
                 {
