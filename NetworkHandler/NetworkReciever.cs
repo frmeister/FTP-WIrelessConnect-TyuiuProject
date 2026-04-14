@@ -84,8 +84,8 @@ namespace NetworkHandler
 
         public static bool IsLocalAddress(IPAddress address)
         {
-            return _localAddresses.Contains(address);
-            // return false;
+            //return _localAddresses.Contains(address);
+            return false;
         }
 
     }

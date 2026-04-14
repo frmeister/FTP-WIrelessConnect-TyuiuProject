@@ -11,7 +11,8 @@ namespace NetworkHandler
     public class NetworkResponser
     {
         public static List<IPAddress> connected_clients = new List<IPAddress>();
-        public static bool Is_ClientReciever = false;
+        // public static bool Is_ClientReciever = false;
+        public static bool Is_ClientReciever = true;
 
         private static string appKey, nickName;
 

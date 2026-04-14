@@ -39,7 +39,6 @@ namespace MainForm
         private void main_buttonParse_Click(object sender, EventArgs e)
         {
             NetworkParser.Broadcast("HELLO WRLSSUPDCONNECT:KEY_123");
-
             Task.Delay(500).ContinueWith(_ =>
             {
                 this.Invoke(new Action(() =>
@@ -48,7 +47,7 @@ namespace MainForm
 
                     if (IP_list.Count == 0)
                     {
-                        labelStatus.Text = "Клиенты не найдены. Проверьте подключение.";
+                        labelStatus.Text = "Пользователи не найдены. Проверьте подключение.";
                     }
                     else
                     {
@@ -57,10 +56,11 @@ namespace MainForm
                         foreach (IPAddress ip in IP_list)
                         {
                             comboBox_ListIPs.Items.Add(ip.ToString());
+
                         }
 
                         comboBox_ListIPs.Enabled = true;
-                        labelStatus.Text = $"Найдено {IP_list.Count} клиент(ов)";
+                        labelStatus.Text = $"Найдено {IP_list.Count} пользователей";
                     }
                 }));
             });
@@ -76,6 +76,8 @@ namespace MainForm
                 {
                     labelStatus.Text = $"Выбран файл: {Path.GetFileName(openFilePath)}";
                     buttonSend.Enabled = true;
+                    buttonSaveFile.Enabled = true;
+                    buttonStats.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -93,15 +95,11 @@ namespace MainForm
 
             if (success)
             {
-                labelStatus.Text = "Файл отправлен!";
-                MessageBox.Show("Файл успешно отправлен!", "Успех",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                labelStatus.Text = "Файл отправлен!"; MessageBox.Show("Файл успешно отправлен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                labelStatus.Text = "Ошибка отправки";
-                MessageBox.Show("Ошибка отправки файла", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                labelStatus.Text = "Ошибка отправки"; MessageBox.Show("Ошибка отправки файла", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -109,8 +107,7 @@ namespace MainForm
         {
             if (!fileReceiver.IsComplete)
             {
-                MessageBox.Show("Файл еще не полностью получен!", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Файл еще не полностью получен!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -131,14 +128,12 @@ namespace MainForm
                 if (success)
                 {
                     labelStatus.Text = $"Файл сохранен: {Path.GetFileName(path)}";
-                    MessageBox.Show($"Файл успешно сохранен!\nПуть: {path}",
-                        "Сохранение завершено", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"Файл успешно сохранен!\nПуть: {path}", "Сохранение завершено", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     buttonSaveFile.Enabled = false;
                 }
                 else
                 {
-                    MessageBox.Show("Ошибка при сохранении файла!", "Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Ошибка при сохранении файла!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -189,15 +184,26 @@ namespace MainForm
             string selectedState = comboBox_ListIPs.SelectedItem.ToString();
             selectedIP = selectedState;
 
+
             buttonOpenFile.Enabled = true;
+            buttonStop.Enabled = true;
             // buttonSaveFile.Enabled = true; Понять что делать после решения проблемы (1), пока стандарт = true
         }
+        private void buttonStats_Click(object sender, EventArgs e)
+        {
+            string receivedData = textBoxReceivedContent.Text;
+            FormStats statsForm = new FormStats();
+            statsForm.ReceiveData(receivedData);
+            statsForm.Show();
+        }
+
 
         private void comboBox_ListIPs_onInit()
         {
             comboBox_ListIPs.Items.Clear();
             comboBox_ListIPs.Items.Add("Клинтов нет");
             comboBox_ListIPs.Enabled = false;
+
         }
 
         #endregion
@@ -280,5 +286,8 @@ namespace MainForm
         }
 
         #endregion
+
+
+       
     }
 }

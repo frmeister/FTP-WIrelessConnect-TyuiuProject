@@ -42,8 +42,7 @@ namespace FilePacket
                         PacketId = packetId
                     };
                     byte[] serializedPacket = FilePacket.Serialize(packet);
-                    await client.SendAsync(serializedPacket, serializedPacket.Length,
-                                           new IPEndPoint(targetIp, port));
+                    await client.SendAsync(serializedPacket, serializedPacket.Length,   new IPEndPoint(targetIp, port));
 
                     await Task.Delay(1);
                 }
