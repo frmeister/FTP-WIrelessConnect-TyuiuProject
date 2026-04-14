@@ -1,4 +1,4 @@
-using UDP_BroadcastHandler;
+using NetworkHandler;
 
 namespace MainForm
 {
@@ -10,8 +10,6 @@ namespace MainForm
         [STAThread]
         static void Main()
         {
-  
-
             ApplicationConfiguration.Initialize();
 
             string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -22,7 +20,7 @@ namespace MainForm
             
             ConfigManager.Initialize(appDirectory);
 
-            NetworkResponser.Initialize(ConfigManager.GetValue("appKey"));
+            NetworkResponser.Initialize(ConfigManager.GetValue("appKey"), ConfigManager.GetValue("nickName"));
 
             Task.Run(() => NetworkReciever.Listener());
             Task.Run(() => NetworkController.Is_Online());

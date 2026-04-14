@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UDP_BroadcastHandler\NetworkHandler.csproj" />
+    <ProjectReference Include="..\NetworkHandler\NetworkHandler.csproj" />
   </ItemGroup>
 
 </Project>

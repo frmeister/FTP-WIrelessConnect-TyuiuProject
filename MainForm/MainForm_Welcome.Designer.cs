@@ -1,4 +1,5 @@
-﻿namespace MainForm
+﻿
+namespace MainForm
 {
     partial class MainForm_Welcome
     {
@@ -44,6 +45,7 @@
             toolTip = new ToolTip(components);
             openFileDialog = new OpenFileDialog();
             saveFileDialog = new SaveFileDialog();
+            main_buttonSettitngs = new Button();
             groupBoxButtons.SuspendLayout();
             groupBoxStatus.SuspendLayout();
             groupBoxData.SuspendLayout();
@@ -52,6 +54,7 @@
             // groupBoxButtons
             // 
             groupBoxButtons.Controls.Add(buttonSend);
+            groupBoxButtons.Controls.Add(main_buttonSettitngs);
             groupBoxButtons.Controls.Add(buttonSaveFile);
             groupBoxButtons.Controls.Add(buttonStop);
             groupBoxButtons.Controls.Add(buttonOpenFile);
@@ -186,6 +189,17 @@
             // 
             openFileDialog.FileName = "openFileDialog1";
             // 
+            // main_buttonSettitngs
+            // 
+            main_buttonSettitngs.Location = new Point(4, 416);
+            main_buttonSettitngs.Margin = new Padding(3, 2, 3, 2);
+            main_buttonSettitngs.Name = "main_buttonSettitngs";
+            main_buttonSettitngs.Size = new Size(144, 71);
+            main_buttonSettitngs.TabIndex = 5;
+            main_buttonSettitngs.Text = "Settings";
+            main_buttonSettitngs.UseVisualStyleBackColor = true;
+            main_buttonSettitngs.Click += main_buttonSettings_Click;
+            // 
             // MainForm_Welcome
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -220,5 +234,6 @@
         private SaveFileDialog saveFileDialog;
         private Button buttonSend;
         private ComboBox comboBox_ListIPs;
+        private Button main_buttonSettitngs;
     }
 }

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
-using UDP_BroadcastHandler;
+using NetworkHandler;
 using FilePacket;
 
 namespace MainForm
@@ -44,7 +44,7 @@ namespace MainForm
             {
                 this.Invoke(new Action(() =>
                 {
-                    List<IPAddress> IP_list = UDP_BroadcastHandler.NetworkController.clients;
+                    List<IPAddress> IP_list = NetworkHandler.NetworkController.clients;
 
                     if (IP_list.Count == 0)
                     {
@@ -150,6 +150,12 @@ namespace MainForm
             fileReceiver.ResetReceiver();
             NetworkReciever.Is_ClientReciever = true;
             main_buttonParse.Enabled = true;
+        }
+
+        private void main_buttonSettings_Click(object sender, EventArgs e)
+        {
+            MainForm_Settings form_Settings = new MainForm_Settings();
+            form_Settings.ShowDialog();
         }
 
         #endregion

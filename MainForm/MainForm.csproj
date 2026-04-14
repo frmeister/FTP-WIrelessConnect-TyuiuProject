@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FilePacket\FilePacket.csproj" />
-    <ProjectReference Include="..\UDP_BroadcastHandler\NetworkHandler.csproj" />
+    <ProjectReference Include="..\NetworkHandler\NetworkHandler.csproj" />
   </ItemGroup>
 
   <ItemGroup>

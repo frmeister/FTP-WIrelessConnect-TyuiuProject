@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using UDP_BroadcastHandler;
+using NetworkHandler;
 using System.IO;
 
 namespace FilePacket

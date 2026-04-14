@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
-namespace UDP_BroadcastHandler
+namespace NetworkHandler
 {
     public class NetworkController
     {

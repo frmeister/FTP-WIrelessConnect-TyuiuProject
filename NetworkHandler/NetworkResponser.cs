@@ -6,18 +6,20 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UDP_BroadcastHandler
+namespace NetworkHandler
 {
     public class NetworkResponser
     {
         public static List<IPAddress> connected_clients = new List<IPAddress>();
         public static bool Is_ClientReciever = false;
 
-        private static string appKey;
+        private static string appKey, nickName;
 
-        public static void Initialize(string value)
+        public static void Initialize(string value_appkey, string value_nickname)
         {
-            appKey = value;
+            appKey = value_appkey;
+
+            nickName = value_nickname;
         }
 
         public static void Echo(IPAddress remote, string msg)
