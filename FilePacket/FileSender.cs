@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -46,11 +47,12 @@ namespace FilePacket
 
                     await Task.Delay(1);
                 }
+                Debug.WriteLine($"[FileSender] Отправлено {totalPackets} пакетов");
                 return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка отправки: {ex.Message}");
+                Debug.WriteLine($"[FileSender] Ошибка отправки: {ex.Message}");
                 return false;
             }
         }

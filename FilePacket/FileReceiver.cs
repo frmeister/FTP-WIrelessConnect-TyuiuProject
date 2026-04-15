@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NetworkHandler;
 using System.IO;
+using System.Diagnostics;
 
 namespace FilePacket
 {
@@ -40,7 +41,7 @@ namespace FilePacket
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Ошибка приема: {ex.Message}");
+                    Debug.WriteLine($"[FileReciever] Ошибка приема: {ex.Message}");
                 }
             }
         }
@@ -88,7 +89,7 @@ namespace FilePacket
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Ошибка обработки пакета: {ex.Message}");
+                Debug.WriteLine($"[FielReciever] Ошибка обработки пакета: {ex.Message}");
             }
         }
 

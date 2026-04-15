@@ -28,10 +28,14 @@ namespace NetworkHandler
 
         public static void Is_Online()
         {
-            timer.Elapsed += Timer_Elapsed;
+            if (!NetworkReciever.Is_ClientReciever)
+            {
+                timer.Elapsed += Timer_Elapsed;
 
-            timer.AutoReset = true;
-            timer.Enabled = true;
+                timer.AutoReset = true;
+                timer.Enabled = true;
+            }
+            else return;
         }
 
         private static void Timer_Elapsed(object? sender, ElapsedEventArgs e)
@@ -47,7 +51,7 @@ namespace NetworkHandler
                 foreach (IPAddress ip in clients)
                 {
 
-                    NetworkParser.Send_message(ip, "CHECK WRLSSUPDCONNECT:KEY_123");
+                    NetworkParser.Send_message(ip, "CHECK WRLSCONNECT_123");
 
                 }
             }

@@ -14,6 +14,10 @@ namespace MainForm
         private Task receiveTask;
         private string selectedIP;
 
+        // DOP
+        private string nickName = ConfigManager.GetValue("nickName");
+        public string nickName_Recived = NetworkResponser.nickName_Recieved;
+
         public MainForm_Welcome()
         {
             InitializeComponent();
@@ -38,7 +42,8 @@ namespace MainForm
 
         private void main_buttonParse_Click(object sender, EventArgs e)
         {
-            NetworkParser.Broadcast("HELLO WRLSSUPDCONNECT:KEY_123");
+            NetworkParser.Broadcast($"HELLO WRLSCONNECT_123 {nickName}");
+
             Task.Delay(500).ContinueWith(_ =>
             {
                 this.Invoke(new Action(() =>
