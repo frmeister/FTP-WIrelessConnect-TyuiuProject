@@ -87,6 +87,5 @@ namespace NetworkHandler
             //return _localAddresses.Contains(address);
             return false;
         }
-
     }
 }

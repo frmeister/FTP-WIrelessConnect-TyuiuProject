@@ -1,7 +1,8 @@
+using FilePacket;
+using NetworkHandler;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using NetworkHandler;
-using FilePacket;
 
 namespace MainForm
 {
@@ -14,10 +15,9 @@ namespace MainForm
         private Task receiveTask;
         private string selectedIP;
 
-        // DOP
         private string nickName = ConfigManager.GetValue("nickName");
         public string nickName_Recived = NetworkResponser.nickName_Recieved;
-
+        
         public MainForm_Welcome()
         {
             InitializeComponent();
@@ -60,8 +60,8 @@ namespace MainForm
 
                         foreach (IPAddress ip in IP_list)
                         {
-                            comboBox_ListIPs.Items.Add(ip.ToString());
-
+                            string ip_name = NetworkController.dClients.FirstOrDefault(x => x.Value == ip).Key;
+                            comboBox_ListIPs.Items.Add(ip_name); 
                         }
 
                         comboBox_ListIPs.Enabled = true;
@@ -187,8 +187,13 @@ namespace MainForm
         private void comboBox_ListIPs_SelectedIndexChanged(object sender, EventArgs e)
         {
             string selectedState = comboBox_ListIPs.SelectedItem.ToString();
-            selectedIP = selectedState;
+            if (NetworkController.dClients.TryGetValue(selectedState, out IPAddress value))
+            {
+                selectedState = value.ToString();
+                selectedIP = selectedState;
+            }
 
+            else return;
 
             buttonOpenFile.Enabled = true;
             buttonStop.Enabled = true;

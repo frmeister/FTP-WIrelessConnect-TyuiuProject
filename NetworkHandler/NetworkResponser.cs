@@ -20,6 +20,8 @@ using FilePacket;
 
     Текущие используемые комманды:
     TYPE: HELLO, ECHO_HELLO, CHECK, ECHO_CHECK
+
+    ASK_SEND {appKey} {nickName}
 */
 
 namespace NetworkHandler
@@ -77,7 +79,7 @@ namespace NetworkHandler
                     {
                         Debug.WriteLine($"[NetworkResponser] Отправляю ответ на HELLO...");
                         NetworkParser.Send_message(remote, $"ECHO_HELLO WRLSCONNECT_123 {nickName}"); 
-                        NetworkController.GetNew_Client(remote);
+                        NetworkController.GetNew_Client(remote, nickName_Recieved);
 
                         _isClientReciever = true;
                     }
@@ -87,7 +89,7 @@ namespace NetworkHandler
                 case "ECHO_HELLO":
                     if (!NetworkController.clients.Contains(remote))
                     {
-                        NetworkController.GetNew_Client(remote);
+                        NetworkController.GetNew_Client(remote, nickName_Recieved);
                     }
                     break;
 

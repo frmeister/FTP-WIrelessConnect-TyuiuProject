@@ -15,14 +15,22 @@ namespace NetworkHandler
     {
         static Timer timer = new Timer(10000);
         public static List<IPAddress> clients = new List<IPAddress>();
+
+        public static Dictionary<string, IPAddress> dClients = new Dictionary<string, IPAddress>();
+
         public static List<IPAddress> old_clients = new List<IPAddress>();
 
-        public static void GetNew_Client(IPAddress ip)
+        public static void GetNew_Client(IPAddress ip, string nick)
         {
             lock (clients)
             {
                 if (!clients.Contains(ip))
                     clients.Add(ip);
+            }
+
+            lock (dClients)
+            {
+                dClients.TryAdd(nick, ip);
             }
         }
 

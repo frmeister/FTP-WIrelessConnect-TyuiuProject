@@ -63,20 +63,23 @@ namespace MainForm
             groupBoxButtons.Controls.Add(main_buttonParse);
             groupBoxButtons.Dock = DockStyle.Left;
             groupBoxButtons.Location = new Point(0, 0);
+            groupBoxButtons.Margin = new Padding(3, 2, 3, 2);
             groupBoxButtons.Name = "groupBoxButtons";
-            groupBoxButtons.Size = new Size(176, 763);
+            groupBoxButtons.Padding = new Padding(3, 2, 3, 2);
+            groupBoxButtons.Size = new Size(154, 572);
             groupBoxButtons.TabIndex = 1;
             groupBoxButtons.TabStop = false;
             groupBoxButtons.Text = "Элементы управления";
             // 
             // buttonStats
             // 
-            buttonStats.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            buttonStats.Anchor = AnchorStyles.Bottom;
             buttonStats.Enabled = false;
             buttonStats.Image = (Image)resources.GetObject("buttonStats.Image");
-            buttonStats.Location = new Point(5, 353);
+            buttonStats.Location = new Point(4, 265);
+            buttonStats.Margin = new Padding(3, 2, 3, 2);
             buttonStats.Name = "buttonStats";
-            buttonStats.Size = new Size(165, 95);
+            buttonStats.Size = new Size(144, 71);
             buttonStats.TabIndex = 7;
             buttonStats.UseVisualStyleBackColor = true;
             buttonStats.Click += buttonStats_Click;
@@ -85,9 +88,10 @@ namespace MainForm
             // 
             buttonSend.Enabled = false;
             buttonSend.Image = (Image)resources.GetObject("buttonSend.Image");
-            buttonSend.Location = new Point(5, 252);
+            buttonSend.Location = new Point(4, 189);
+            buttonSend.Margin = new Padding(3, 2, 3, 2);
             buttonSend.Name = "buttonSend";
-            buttonSend.Size = new Size(165, 95);
+            buttonSend.Size = new Size(144, 71);
             buttonSend.TabIndex = 6;
             buttonSend.UseVisualStyleBackColor = true;
             buttonSend.Click += buttonSend_Click;
@@ -95,9 +99,10 @@ namespace MainForm
             // main_buttonSettitngs
             // 
             main_buttonSettitngs.Image = (Image)resources.GetObject("main_buttonSettitngs.Image");
-            main_buttonSettitngs.Location = new Point(6, 656);
+            main_buttonSettitngs.Location = new Point(5, 492);
+            main_buttonSettitngs.Margin = new Padding(3, 2, 3, 2);
             main_buttonSettitngs.Name = "main_buttonSettitngs";
-            main_buttonSettitngs.Size = new Size(165, 95);
+            main_buttonSettitngs.Size = new Size(144, 71);
             main_buttonSettitngs.TabIndex = 5;
             main_buttonSettitngs.UseVisualStyleBackColor = true;
             main_buttonSettitngs.Click += main_buttonSettings_Click;
@@ -106,9 +111,10 @@ namespace MainForm
             // 
             buttonSaveFile.Enabled = false;
             buttonSaveFile.Image = (Image)resources.GetObject("buttonSaveFile.Image");
-            buttonSaveFile.Location = new Point(5, 454);
+            buttonSaveFile.Location = new Point(4, 340);
+            buttonSaveFile.Margin = new Padding(3, 2, 3, 2);
             buttonSaveFile.Name = "buttonSaveFile";
-            buttonSaveFile.Size = new Size(165, 95);
+            buttonSaveFile.Size = new Size(144, 71);
             buttonSaveFile.TabIndex = 5;
             buttonSaveFile.UseVisualStyleBackColor = true;
             buttonSaveFile.Click += buttonSaveFile_Click;
@@ -118,9 +124,10 @@ namespace MainForm
             buttonStop.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             buttonStop.Enabled = false;
             buttonStop.Image = (Image)resources.GetObject("buttonStop.Image");
-            buttonStop.Location = new Point(5, 555);
+            buttonStop.Location = new Point(4, 416);
+            buttonStop.Margin = new Padding(3, 2, 3, 2);
             buttonStop.Name = "buttonStop";
-            buttonStop.Size = new Size(165, 95);
+            buttonStop.Size = new Size(144, 71);
             buttonStop.TabIndex = 3;
             buttonStop.UseVisualStyleBackColor = true;
             buttonStop.Click += buttonStop_Click;
@@ -129,9 +136,10 @@ namespace MainForm
             // 
             buttonOpenFile.Enabled = false;
             buttonOpenFile.Image = (Image)resources.GetObject("buttonOpenFile.Image");
-            buttonOpenFile.Location = new Point(5, 151);
+            buttonOpenFile.Location = new Point(4, 113);
+            buttonOpenFile.Margin = new Padding(3, 2, 3, 2);
             buttonOpenFile.Name = "buttonOpenFile";
-            buttonOpenFile.Size = new Size(165, 95);
+            buttonOpenFile.Size = new Size(144, 71);
             buttonOpenFile.TabIndex = 2;
             buttonOpenFile.UseVisualStyleBackColor = true;
             buttonOpenFile.Click += buttonOpenFile_Click;
@@ -139,10 +147,9 @@ namespace MainForm
             // main_buttonParse
             // 
             main_buttonParse.Image = (Image)resources.GetObject("main_buttonParse.Image");
-            main_buttonParse.Location = new Point(6, 49);
-            main_buttonParse.Margin = new Padding(3, 4, 3, 4);
+            main_buttonParse.Location = new Point(5, 37);
             main_buttonParse.Name = "main_buttonParse";
-            main_buttonParse.Size = new Size(165, 95);
+            main_buttonParse.Size = new Size(144, 71);
             main_buttonParse.TabIndex = 1;
             main_buttonParse.UseVisualStyleBackColor = true;
             main_buttonParse.Click += main_buttonParse_Click;
@@ -152,9 +159,11 @@ namespace MainForm
             groupBoxStatus.Controls.Add(comboBox_ListIPs);
             groupBoxStatus.Controls.Add(labelStatus);
             groupBoxStatus.Dock = DockStyle.Top;
-            groupBoxStatus.Location = new Point(176, 0);
+            groupBoxStatus.Location = new Point(154, 0);
+            groupBoxStatus.Margin = new Padding(3, 2, 3, 2);
             groupBoxStatus.Name = "groupBoxStatus";
-            groupBoxStatus.Size = new Size(1195, 67);
+            groupBoxStatus.Padding = new Padding(3, 2, 3, 2);
+            groupBoxStatus.Size = new Size(1046, 50);
             groupBoxStatus.TabIndex = 3;
             groupBoxStatus.TabStop = false;
             groupBoxStatus.Text = "Статус:";
@@ -164,31 +173,31 @@ namespace MainForm
             comboBox_ListIPs.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             comboBox_ListIPs.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox_ListIPs.FormattingEnabled = true;
-            comboBox_ListIPs.Location = new Point(968, 28);
-            comboBox_ListIPs.Margin = new Padding(3, 4, 3, 4);
+            comboBox_ListIPs.Location = new Point(847, 21);
             comboBox_ListIPs.Name = "comboBox_ListIPs";
-            comboBox_ListIPs.Size = new Size(220, 28);
+            comboBox_ListIPs.Size = new Size(193, 23);
             comboBox_ListIPs.TabIndex = 4;
             comboBox_ListIPs.SelectedIndexChanged += comboBox_ListIPs_SelectedIndexChanged;
             // 
             // labelStatus
             // 
             labelStatus.Enabled = false;
-            labelStatus.Location = new Point(3, 23);
-            labelStatus.Margin = new Padding(3, 4, 3, 4);
+            labelStatus.Location = new Point(3, 17);
             labelStatus.Multiline = true;
             labelStatus.Name = "labelStatus";
             labelStatus.ReadOnly = true;
-            labelStatus.Size = new Size(1189, 41);
+            labelStatus.Size = new Size(1041, 32);
             labelStatus.TabIndex = 0;
             // 
             // groupBoxData
             // 
             groupBoxData.Controls.Add(textBoxReceivedContent);
             groupBoxData.Dock = DockStyle.Fill;
-            groupBoxData.Location = new Point(176, 67);
+            groupBoxData.Location = new Point(154, 50);
+            groupBoxData.Margin = new Padding(3, 2, 3, 2);
             groupBoxData.Name = "groupBoxData";
-            groupBoxData.Size = new Size(1195, 696);
+            groupBoxData.Padding = new Padding(3, 2, 3, 2);
+            groupBoxData.Size = new Size(1046, 522);
             groupBoxData.TabIndex = 2;
             groupBoxData.TabStop = false;
             groupBoxData.Text = "Полученные данные:";
@@ -196,11 +205,12 @@ namespace MainForm
             // textBoxReceivedContent
             // 
             textBoxReceivedContent.Dock = DockStyle.Fill;
-            textBoxReceivedContent.Location = new Point(3, 23);
+            textBoxReceivedContent.Location = new Point(3, 18);
+            textBoxReceivedContent.Margin = new Padding(3, 2, 3, 2);
             textBoxReceivedContent.Multiline = true;
             textBoxReceivedContent.Name = "textBoxReceivedContent";
             textBoxReceivedContent.ScrollBars = ScrollBars.Both;
-            textBoxReceivedContent.Size = new Size(1189, 670);
+            textBoxReceivedContent.Size = new Size(1040, 502);
             textBoxReceivedContent.TabIndex = 0;
             // 
             // openFileDialog
@@ -209,14 +219,13 @@ namespace MainForm
             // 
             // MainForm_Welcome
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1371, 763);
+            ClientSize = new Size(1200, 572);
             Controls.Add(groupBoxData);
             Controls.Add(groupBoxStatus);
             Controls.Add(groupBoxButtons);
-            Margin = new Padding(3, 4, 3, 4);
-            MinimumSize = new Size(1387, 799);
+            MinimumSize = new Size(1216, 609);
             Name = "MainForm_Welcome";
             Text = "Welcome";
             groupBoxButtons.ResumeLayout(false);

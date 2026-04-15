@@ -76,9 +76,9 @@ namespace MainForm
                     ConfigManager.SetValue("dataPath", folderPath);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show("Ошибка ", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
