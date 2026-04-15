@@ -20,7 +20,10 @@ namespace MainForm
             
             ConfigManager.Initialize(appDirectory);
 
-            NetworkResponser.Initialize(ConfigManager.GetValue("appKey"), ConfigManager.GetValue("nickName"));
+            NetworkResponser.Initialize(
+                ConfigManager.GetValue("appKey"),
+                ConfigManager.GetValue("nickName"),
+                ConfigManager.GetValue("dataPath"));
 
             Task.Run(() => NetworkReciever.Listener());
             Task.Run(() => NetworkController.Is_Online());

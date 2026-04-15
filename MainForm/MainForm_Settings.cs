@@ -84,12 +84,21 @@ namespace MainForm
 
         private void settings_buttonSourceData_ChangeDirectory_Click(object sender, EventArgs e)
         {
+
+
             string selectedPath;
 
-            settings_folderBrowserDialog.ShowDialog();
-            selectedPath = settings_folderBrowserDialog.SelectedPath;
+            openFileDialog1.ShowDialog();
+            selectedPath = openFileDialog1.FileName;
 
             settings_textBoxSourceData_Output.Text = selectedPath;
+
+            //string selectedPath;
+
+            //settings_folderBrowserDialog.ShowDialog();
+            //selectedPath = settings_folderBrowserDialog.SelectedPath;
+
+            //settings_textBoxSourceData_Output.Text = selectedPath;
         }
 
         private void settings_buttonCancel_Click(object sender, EventArgs e)

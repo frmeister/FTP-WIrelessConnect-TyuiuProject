@@ -8,7 +8,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using FilePacket;
 /*
     Логика обращений с сообщениями:
 
@@ -29,14 +29,18 @@ namespace NetworkHandler
         public static List<IPAddress> connected_clients = new List<IPAddress>();
         public static bool _isClientReciever = false;
 
-        private static string appKey, nickName;
+        private static string appKey, nickName,FilePath;
         public static string nickName_Recieved;
 
-        public static void Initialize(string value_appkey, string value_nickname)
+        FileSender fp = new FileSender();
+
+        public static void Initialize(string value_appkey, string value_nickname, string value_FilePath)
         {
             appKey = value_appkey;
 
             nickName = value_nickname;
+
+            FilePath = value_FilePath;
 
             Debug.WriteLine($"[NetworkResponser] ------------------------------------");
             Debug.WriteLine($"[NetworkResponser] Текущий ключ: {appKey}");
@@ -104,11 +108,37 @@ namespace NetworkHandler
                     }
                     break;
 
+
+                case "ASK_SEND":
+                    IPAddress targetIp;
+                    if (dClients.TryGetValue(nickName_Recieved, out IPAddress value))
+                    {
+                        targetIp = value;
+                    }
+                    else break;
+
+                        bool success = SendAskedFile(FilePath, targetIp, 8889);
+
+                    if (success)
+                    {
+                        Debug.WriteLine($"[NetworkResponser] : Файл отправлен успешно ");
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"[NetworkResponser] : Файл не отправлен");
+                    }
+                    break;
+
+
                 // Лог случайного пакета
                 default:
                     Debug.WriteLine($"[NetworkResponser] : Неизвестный пакет от {remote}: {msg}");
                     break;
             }
+        }
+        private async bool SendAskedFile(string Path, IPAddress ip, int port) 
+        {
+           return await fp.SendFile(Path, ip , port);
         }
     }
 }
