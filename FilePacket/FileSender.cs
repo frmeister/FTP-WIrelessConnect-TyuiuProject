@@ -56,5 +56,24 @@ namespace FilePacket
                 return false;
             }
         }
+
+        public async Task<bool> SendAskedFile(string Path, IPAddress ip, int port)
+        {
+            FileSender fs = new FileSender();
+
+            bool success = await fs.SendFile(Path, ip, port);
+
+            if (success)
+            {
+                Debug.WriteLine($"[FileSender] : Запрашиваемый файл отправлен успешно ");
+            }
+            else
+            {
+                Debug.WriteLine($"[FileSender] : Запрашиваемый файл не отправлен");
+            }
+
+            return success;
+        }
+
     }
 }

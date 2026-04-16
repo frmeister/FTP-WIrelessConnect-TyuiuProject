@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualBasic;
+﻿using FilePacket;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +9,6 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using FilePacket;
 /*
     Логика обращений с сообщениями:
 
@@ -33,8 +33,6 @@ namespace NetworkHandler
 
         private static string appKey, nickName,FilePath;
         public static string nickName_Recieved;
-
-        FileSender fp = new FileSender();
 
         public static void Initialize(string value_appkey, string value_nickname, string value_FilePath)
         {
@@ -112,35 +110,27 @@ namespace NetworkHandler
 
 
                 case "ASK_SEND":
+
                     IPAddress targetIp;
-                    if (dClients.TryGetValue(nickName_Recieved, out IPAddress value))
+                    
+                    FileSender fs = new FileSender();
+
+                    if (NetworkController.dClients.TryGetValue(nickName_Recieved, out IPAddress value))
                     {
                         targetIp = value;
+
+                        Task.Run(() => fs.SendAskedFile(FilePath, targetIp, 8889));
+
+                        break;
                     }
                     else break;
-
-                        bool success = SendAskedFile(FilePath, targetIp, 8889);
-
-                    if (success)
-                    {
-                        Debug.WriteLine($"[NetworkResponser] : Файл отправлен успешно ");
-                    }
-                    else
-                    {
-                        Debug.WriteLine($"[NetworkResponser] : Файл не отправлен");
-                    }
-                    break;
-
+                    
 
                 // Лог случайного пакета
                 default:
                     Debug.WriteLine($"[NetworkResponser] : Неизвестный пакет от {remote}: {msg}");
                     break;
             }
-        }
-        private async bool SendAskedFile(string Path, IPAddress ip, int port) 
-        {
-           return await fp.SendFile(Path, ip , port);
         }
     }
 }

@@ -14,10 +14,11 @@ namespace MainForm
         private FileReceiver fileReceiver;
         private Task receiveTask;
         private string selectedIP;
+        private string KEY;
 
         private string nickName = ConfigManager.GetValue("nickName");
         public string nickName_Recived = NetworkResponser.nickName_Recieved;
-        
+
         public MainForm_Welcome()
         {
             InitializeComponent();
@@ -36,13 +37,15 @@ namespace MainForm
 
             openFileDialog.Filter = "Все файлы (*.*)|*.*";
             saveFileDialog.Filter = "Все файлы (*.*)|*.*";
+
+            KEY = ConfigManager.GetValue("appKey");
         }
 
         #region ELEMENTS
 
         private void main_buttonParse_Click(object sender, EventArgs e)
         {
-            NetworkParser.Broadcast($"HELLO WRLSCONNECT_123 {nickName}");
+            NetworkParser.Broadcast($"HELLO {KEY} {nickName}");
 
             Task.Delay(500).ContinueWith(_ =>
             {
@@ -61,7 +64,7 @@ namespace MainForm
                         foreach (IPAddress ip in IP_list)
                         {
                             string ip_name = NetworkController.dClients.FirstOrDefault(x => x.Value == ip).Key;
-                            comboBox_ListIPs.Items.Add(ip_name); 
+                            comboBox_ListIPs.Items.Add(ip_name);
                         }
 
                         comboBox_ListIPs.Enabled = true;
@@ -197,6 +200,7 @@ namespace MainForm
 
             buttonOpenFile.Enabled = true;
             buttonStop.Enabled = true;
+            buttonRequest.Enabled = true;
             // buttonSaveFile.Enabled = true; Понять что делать после решения проблемы (1), пока стандарт = true
         }
         private void buttonStats_Click(object sender, EventArgs e)
@@ -299,6 +303,12 @@ namespace MainForm
 
 
 
-        
+
+        private void buttonRequest_Click(object sender, EventArgs e)
+        {
+            NetworkParser.Send_message(IPAddress.Parse(selectedIP), $"ASK_SEND {KEY} {nickName}");
+
+            buttonStats.Enabled = true;
+        }
     }
 }

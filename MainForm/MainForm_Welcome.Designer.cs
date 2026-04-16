@@ -40,6 +40,7 @@ namespace MainForm
             buttonOpenFile = new Button();
             main_buttonParse = new Button();
             groupBoxStatus = new GroupBox();
+            buttonRequest = new Button();
             comboBox_ListIPs = new ComboBox();
             labelStatus = new TextBox();
             groupBoxData = new GroupBox();
@@ -156,6 +157,7 @@ namespace MainForm
             // 
             // groupBoxStatus
             // 
+            groupBoxStatus.Controls.Add(buttonRequest);
             groupBoxStatus.Controls.Add(comboBox_ListIPs);
             groupBoxStatus.Controls.Add(labelStatus);
             groupBoxStatus.Dock = DockStyle.Top;
@@ -167,6 +169,17 @@ namespace MainForm
             groupBoxStatus.TabIndex = 3;
             groupBoxStatus.TabStop = false;
             groupBoxStatus.Text = "Статус:";
+            // 
+            // buttonRequest
+            // 
+            buttonRequest.Enabled = false;
+            buttonRequest.Location = new Point(766, 21);
+            buttonRequest.Name = "buttonRequest";
+            buttonRequest.Size = new Size(75, 23);
+            buttonRequest.TabIndex = 4;
+            buttonRequest.Text = "Запрос";
+            buttonRequest.UseVisualStyleBackColor = true;
+            buttonRequest.Click += buttonRequest_Click;
             // 
             // comboBox_ListIPs
             // 
@@ -253,5 +266,6 @@ namespace MainForm
         private ComboBox comboBox_ListIPs;
         private Button main_buttonSettitngs;
         private Button buttonStats;
+        private Button buttonRequest;
     }
 }

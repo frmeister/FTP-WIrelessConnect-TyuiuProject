@@ -5,9 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-	
-	<ItemGroup>
-		<ProjectReference Include="..\FilePacket\FilePacket.csproj" />
-	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FilePacket\FilePacket.csproj" />
+  </ItemGroup>
 	
 </Project>
