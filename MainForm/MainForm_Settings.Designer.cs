@@ -52,7 +52,7 @@
             settings_groupBoxInfo.Margin = new Padding(3, 4, 3, 4);
             settings_groupBoxInfo.Name = "settings_groupBoxInfo";
             settings_groupBoxInfo.Padding = new Padding(3, 4, 3, 4);
-            settings_groupBoxInfo.Size = new Size(451, 624);
+            settings_groupBoxInfo.Size = new Size(451, 608);
             settings_groupBoxInfo.TabIndex = 0;
             settings_groupBoxInfo.TabStop = false;
             settings_groupBoxInfo.Text = "Инфомация";
@@ -108,7 +108,7 @@
             // 
             // settings_buttonSave
             // 
-            settings_buttonSave.Location = new Point(287, 648);
+            settings_buttonSave.Location = new Point(287, 632);
             settings_buttonSave.Margin = new Padding(3, 4, 3, 4);
             settings_buttonSave.Name = "settings_buttonSave";
             settings_buttonSave.Size = new Size(86, 51);
@@ -119,7 +119,7 @@
             // 
             // settings_buttonCancel
             // 
-            settings_buttonCancel.Location = new Point(379, 648);
+            settings_buttonCancel.Location = new Point(379, 631);
             settings_buttonCancel.Margin = new Padding(3, 4, 3, 4);
             settings_buttonCancel.Name = "settings_buttonCancel";
             settings_buttonCancel.Size = new Size(86, 51);

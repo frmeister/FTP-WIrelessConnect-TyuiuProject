@@ -15,9 +15,13 @@ namespace MainForm
         private Task receiveTask;
         private string selectedIP;
         private string KEY;
-
         private string nickName = ConfigManager.GetValue("nickName");
         public string nickName_Recived = NetworkResponser.nickName_Recieved;
+
+        private List<Tuple<string, string>> receivedFilesHistory = new List<Tuple<string, string>>();
+        private List<Tuple<string, string>> receivedFiles = new List<Tuple<string, string>>();
+        private string lastReceivedContent = "";
+        private string currentReceivingFile = "";
 
         public MainForm_Welcome()
         {
@@ -153,6 +157,16 @@ namespace MainForm
             fileReceiver.ResetReceiver();
             NetworkReciever.Is_ClientReciever = true;
             main_buttonParse.Enabled = true;
+            receivedFilesHistory.Clear();
+            lastReceivedContent = "";
+            currentReceivingFile = "";
+            comboBox_ListIPs.Items.Clear();
+            comboBox_ListIPs.Items.Add("Клинтов нет");
+            comboBox_ListIPs.Enabled = false;
+            buttonSaveFile.Enabled = false;
+            buttonStats.Enabled = false;
+            labelStatus.Text = "Все данные очищены";
+
         }
 
         private void main_buttonSettings_Click(object sender, EventArgs e)
@@ -173,19 +187,39 @@ namespace MainForm
             }
             if (fileReceiver.ReceivedContent.Length > 0)
             {
-                textBoxReceivedContent.Text = fileReceiver.ReceivedContent.ToString();
-                if (fileReceiver.IsComplete)
+                string currentContent = fileReceiver.ReceivedContent.ToString();
+                if (currentContent != lastReceivedContent)
                 {
-                    labelStatus.Text = $"Файл {fileReceiver.CurrentFileName} получен! ({fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов)";
-                    buttonSaveFile.Enabled = true;
+                    if (fileReceiver.IsComplete && textBoxReceivedContent.Text.Length > 0)
+                    {
+                        textBoxReceivedContent.AppendText(Environment.NewLine);
+                        textBoxReceivedContent.AppendText(new string('=', 80));
+                        textBoxReceivedContent.AppendText(Environment.NewLine);
+                    }
+
+                    textBoxReceivedContent.AppendText(currentContent);
+                    textBoxReceivedContent.SelectionStart = textBoxReceivedContent.Text.Length;
+                    textBoxReceivedContent.ScrollToCaret();
+                    lastReceivedContent = currentContent;
                 }
-                else
+
+                if (fileReceiver.IsComplete && !string.IsNullOrEmpty(fileReceiver.CurrentFileName))
                 {
-                    labelStatus.Text = $"Получение: {fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов";
-                    buttonSaveFile.Enabled = false;
+                    bool alreadySaved = receivedFilesHistory.Any(f => f.Item1 == fileReceiver.CurrentFileName && f.Item2 == currentContent);
+                    if (!alreadySaved)
+                    {
+                        receivedFilesHistory.Add(Tuple.Create(fileReceiver.CurrentFileName, currentContent));
+                    }
                 }
+
+                labelStatus.Text = fileReceiver.IsComplete
+                    ? $"Файл {fileReceiver.CurrentFileName} получен! ({fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов)"
+                    : $"Получение: {fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов";
+
+                buttonSaveFile.Enabled = fileReceiver.IsComplete;
             }
         }
+
 
         private void comboBox_ListIPs_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -205,9 +239,9 @@ namespace MainForm
         }
         private void buttonStats_Click(object sender, EventArgs e)
         {
-            string receivedData = textBoxReceivedContent.Text;
             FormStats statsForm = new FormStats();
-            statsForm.ReceiveData(receivedData);
+            foreach (var file in receivedFilesHistory)
+                statsForm.AddFileData(file.Item2, file.Item1);
             statsForm.Show();
         }
 
