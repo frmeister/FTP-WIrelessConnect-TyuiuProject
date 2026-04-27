@@ -43,6 +43,7 @@
             numericMaxMeasurements = new NumericUpDown();
             panel3 = new Panel();
             splitter1 = new Splitter();
+            checkedListBoxFiles = new CheckedListBox();
             ((System.ComponentModel.ISupportInitialize)chartData).BeginInit();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
@@ -124,15 +125,16 @@
             // 
             // checkedListPoints
             // 
-            checkedListPoints.Dock = DockStyle.Left;
+            checkedListPoints.Dock = DockStyle.Top;
             checkedListPoints.FormattingEnabled = true;
             checkedListPoints.Location = new Point(0, 27);
             checkedListPoints.Name = "checkedListPoints";
-            checkedListPoints.Size = new Size(213, 603);
+            checkedListPoints.Size = new Size(216, 466);
             checkedListPoints.TabIndex = 8;
             // 
             // panel2
             // 
+            panel2.Controls.Add(checkedListBoxFiles);
             panel2.Controls.Add(checkedListPoints);
             panel2.Controls.Add(comboBoxFiles);
             panel2.Controls.Add(numericMaxMeasurements);
@@ -167,6 +169,15 @@
             splitter1.TabIndex = 7;
             splitter1.TabStop = false;
             // 
+            // checkedListBoxFiles
+            // 
+            checkedListBoxFiles.Dock = DockStyle.Fill;
+            checkedListBoxFiles.FormattingEnabled = true;
+            checkedListBoxFiles.Location = new Point(0, 493);
+            checkedListBoxFiles.Name = "checkedListBoxFiles";
+            checkedListBoxFiles.Size = new Size(216, 137);
+            checkedListBoxFiles.TabIndex = 8;
+            // 
             // FormStats
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -198,5 +209,6 @@
         private Button buttonSaveChart;
         private NumericUpDown numericMaxMeasurements;
         private Splitter splitter1;
+        private CheckedListBox checkedListBoxFiles;
     }
 }
