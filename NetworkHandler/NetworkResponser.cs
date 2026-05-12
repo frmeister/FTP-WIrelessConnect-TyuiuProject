@@ -1,4 +1,4 @@
-﻿using FilePacket;
+using FilePacket;
 using FileHandler;
 using Microsoft.VisualBasic;
 using System;
@@ -47,6 +47,24 @@ namespace NetworkHandler
 
         static FileBrowser fileBrowser = new FileBrowser();
         static FileSender fs = new FileSender();
+
+        private static bool TryExtractParam(string msg, out string extractedParam)
+        {
+            extractedParam = string.Empty;
+            if (string.IsNullOrWhiteSpace(msg))
+                return false;
+
+            // Команда имеет формат: TYPE KEY NICK [PARAM...]
+            // KEY может быть пустым (в сообщении появятся двойные пробелы),
+            // поэтому НЕ удаляем пустые элементы.
+            // Берем все, что идет после третьего токена, включая пробелы в имени файла.
+            string[] parts = msg.Split(new[] { ' ' }, 4, StringSplitOptions.None);
+            if (parts.Length < 4)
+                return false;
+
+            extractedParam = parts[3].Trim();
+            return !string.IsNullOrEmpty(extractedParam);
+        }
 
         public static void Initialize(string value_appkey, string value_nickname, string value_FileDir)
         {
@@ -210,14 +228,11 @@ namespace NetworkHandler
 
                     {
                         // Формат: ECHO_ASK_SEND {appKey} {nickName} [параметр]
-                        // Параметр может содержать пробелы (имя файла)
-                        
-                        // Ищем ник в исходном сообщении
-                        string searchFor = " " + nickName + " ";
-                        int idx = msg.IndexOf(searchFor, StringComparison.Ordinal);
-                        if (idx >= 0)
+                        // Параметр может содержать пробелы (имя файла).
+                        if (!TryExtractParam(msg, out param))
                         {
-                            param = msg.Substring(idx + searchFor.Length).Trim();
+                            Debug.WriteLine($"[ECHO_ASK_SEND] Не удалось извлечь параметр из: '{msg}'");
+                            break;
                         }
 
                         Debug.WriteLine($"[ECHO_ASK_SEND] param = '{param}'");
@@ -255,16 +270,17 @@ namespace NetworkHandler
                     {
                         targetIp = reqValue;
 
-                        string searchFor = " " + nickName + " ";
-                        int idx = msg.IndexOf(searchFor, StringComparison.Ordinal);
-                        if (idx >= 0)
+                        if (!TryExtractParam(msg, out param))
                         {
-                            param = msg.Substring(idx + searchFor.Length).Trim();
+                            Debug.WriteLine($"[REQUEST_FILE] Не удалось извлечь имя файла из: '{msg}'");
+                            break;
                         }
 
                         string fullPath = Path.Combine(FileDir, param);
 
-                        Task.Run(() => fs.SendAskedFile(fullPath, targetIp, 8889));
+                        // Важно отправлять запрошенные файлы последовательно,
+                        // иначе пакеты разных файлов могут перемешаться по времени.
+                        fs.SendAskedFile(fullPath, targetIp, 8889).GetAwaiter().GetResult();
 
                         break;
                     }

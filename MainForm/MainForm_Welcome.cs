@@ -10,7 +10,6 @@ namespace MainForm
     public partial class MainForm_Welcome : Form
     {
         System.Windows.Forms.Timer uiTimer = new System.Windows.Forms.Timer();
-        static System.Windows.Forms.Timer receiveTimer = new System.Windows.Forms.Timer();
 
         public static string openFilePath;
         private FileSender fileSender;
@@ -43,8 +42,8 @@ namespace MainForm
             NetworkResponser.FileListReceived += NetworkResponser_FileListReceived;
             this.Resize += FormMain_Resize;
 
-            openFileDialog.Filter = "Все файлы (*.*)|*.*";
-            saveFileDialog.Filter = "Все файлы (*.*)|*.*";
+            openFileDialog.Filter = "  (*.*)|*.*";
+            saveFileDialog.Filter = "  (*.*)|*.*";
 
             KEY = ConfigManager.GetValue("appKey");
         }
@@ -65,7 +64,7 @@ namespace MainForm
 
                     if (IP_list.Count == 0)
                     {
-                        labelStatus.Text = "Пользователи не найдены. Проверьте подключение.";
+                        labelStatus.Text = "  .  .";
                     }
                     else
                     {
@@ -78,7 +77,7 @@ namespace MainForm
                         }
 
                         comboBox_ListIPs.Enabled = true;
-                        labelStatus.Text = $"Найдено {IP_list.Count} пользователей";
+                        labelStatus.Text = $" {IP_list.Count} ";
                     }
                 }));
             });
@@ -92,7 +91,7 @@ namespace MainForm
                 openFilePath = openFileDialog.FileName;
                 if (!string.IsNullOrEmpty(openFilePath))
                 {
-                    labelStatus.Text = $"Выбран файл: {Path.GetFileName(openFilePath)}";
+                    labelStatus.Text = $" : {Path.GetFileName(openFilePath)}";
                     buttonSend.Enabled = true;
                     buttonSaveFile.Enabled = true;
                     buttonStats.Enabled = true;
@@ -100,24 +99,24 @@ namespace MainForm
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка ", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(" ", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void buttonSend_Click(object sender, EventArgs e)
         {
             IPAddress targetIp = IPAddress.Parse(selectedIP);
-            labelStatus.Text = "Отправка...";
+            labelStatus.Text = "...";
 
             bool success = await fileSender.SendFile(openFilePath, targetIp, 8889);
 
             if (success)
             {
-                labelStatus.Text = "Файл отправлен!"; MessageBox.Show("Файл успешно отправлен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                labelStatus.Text = " !"; MessageBox.Show("  !", "", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                labelStatus.Text = "Ошибка отправки"; MessageBox.Show("Ошибка отправки файла", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                labelStatus.Text = " "; MessageBox.Show("  ", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -125,7 +124,7 @@ namespace MainForm
         {
             if (!fileReceiver.IsComplete)
             {
-                MessageBox.Show("Файл еще не полностью получен!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("    !", "", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -145,13 +144,13 @@ namespace MainForm
                 bool success = fileReceiver.SaveFile(path);
                 if (success)
                 {
-                    labelStatus.Text = $"Файл сохранен: {Path.GetFileName(path)}";
-                    MessageBox.Show($"Файл успешно сохранен!\nПуть: {path}", "Сохранение завершено", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    labelStatus.Text = $" : {Path.GetFileName(path)}";
+                    MessageBox.Show($"  !\n: {path}", " ", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     buttonSaveFile.Enabled = false;
                 }
                 else
                 {
-                    MessageBox.Show("Ошибка при сохранении файла!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("   !", "", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -167,11 +166,11 @@ namespace MainForm
             lastReceivedContent = "";
             currentReceivingFile = "";
             comboBox_ListIPs.Items.Clear();
-            comboBox_ListIPs.Items.Add("Клинтов нет");
+            comboBox_ListIPs.Items.Add(" ");
             comboBox_ListIPs.Enabled = false;
             buttonSaveFile.Enabled = false;
             buttonStats.Enabled = false;
-            labelStatus.Text = "Все данные очищены";
+            labelStatus.Text = "  ";
 
         }
 
@@ -216,18 +215,20 @@ namespace MainForm
                     lastReceivedContent = currentContent;
                 }
 
-                if (fileReceiver.IsComplete && !string.IsNullOrEmpty(fileReceiver.CurrentFileName))
+                var completedFiles = fileReceiver.DequeueCompletedFiles();
+                foreach (var completed in completedFiles)
                 {
-                    bool alreadySaved = receivedFilesHistory.Any(f => f.Item1 == fileReceiver.CurrentFileName && f.Item2 == currentContent);
+                    bool alreadySaved = receivedFilesHistory.Any(f => f.Item1 == completed.Item1 && f.Item2 == completed.Item2);
                     if (!alreadySaved)
                     {
-                        receivedFilesHistory.Add(Tuple.Create(fileReceiver.CurrentFileName, currentContent));
+                        receivedFilesHistory.Add(completed);
+                        Debug.WriteLine($"[UI]     : {completed.Item1}");
                     }
                 }
 
                 labelStatus.Text = fileReceiver.IsComplete
-                    ? $"Файл {fileReceiver.CurrentFileName} получен! ({fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов)"
-                    : $"Получение: {fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} пакетов";
+                    ? $" {fileReceiver.CurrentFileName} ! ({fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} )"
+                    : $": {fileReceiver.CurrentPacket}/{fileReceiver.TotalPackets} ";
 
                 buttonSaveFile.Enabled = fileReceiver.IsComplete;
             }
@@ -248,7 +249,7 @@ namespace MainForm
             buttonOpenFile.Enabled = true;
             buttonStop.Enabled = true;
             buttonRequest.Enabled = true;
-            // buttonSaveFile.Enabled = true; Понять что делать после решения проблемы (1), пока стандарт = true
+            // buttonSaveFile.Enabled = true;       (1),   = true
         }
         private void buttonStats_Click(object sender, EventArgs e)
         {
@@ -262,7 +263,7 @@ namespace MainForm
         private void comboBox_ListIPs_onInit()
         {
             comboBox_ListIPs.Items.Clear();
-            comboBox_ListIPs.Items.Add("Клинтов нет");
+            comboBox_ListIPs.Items.Add(" ");
             comboBox_ListIPs.Enabled = false;
 
         }
@@ -275,7 +276,7 @@ namespace MainForm
                 return;
             }
 
-            // Показываем диалог выбора файлов
+            //    
             using (var selectForm = new MainForm_ListSelect(availableFiles))
             {
                 DialogResult res = selectForm.ShowDialog();
@@ -287,14 +288,9 @@ namespace MainForm
 
                     foreach (string fileName in selected)
                     {
-                        receiveTimer.Interval = 2000;
-                        receiveTimer.Tick += UiTimer_Tick;
-                        receiveTimer.Start();
-
                         NetworkParser.Send_message(fromIp, $"REQUEST_FILE {KEY} {nickName} {fileName}");
                     }
-                    Debug.WriteLine($"Запрошено {selected.Count} файлов у {fromIp}");
-                    receiveTimer.Stop();
+                    Debug.WriteLine($" {selected.Count}   {fromIp}");
                 }
                 else if (res == DialogResult.Cancel) NetworkParser.Send_message(fromIp, $"ECHO_ASK_SEND {KEY} {nickName} CODE_2");
             }
@@ -309,22 +305,22 @@ namespace MainForm
 
         private void InitializeTrayIcon()
         {
-            // Создаем контекстное меню для трея
+            //     
             trayMenu = new ContextMenuStrip();
             trayMenu.Items.Add("Open", null, OnTrayRestore);
             trayMenu.Items.Add(new ToolStripSeparator());
             trayMenu.Items.Add("Exit", null, OnTrayExit);
 
-            // Создаем иконку в трее
+            //    
             trayIcon = new NotifyIcon
             {
-                Icon = SystemIcons.Application, // Можно заменить на свою иконку
+                Icon = SystemIcons.Application, //     
                 Text = "ProgramConnectionPrikol",
                 ContextMenuStrip = trayMenu,
-                Visible = false // Изначально скрыта
+                Visible = false //  
             };
 
-            // Обработка кликов по иконке
+            //    
             trayIcon.DoubleClick += (s, e) => RestoreFromTray();
             trayIcon.MouseClick += (s, e) =>
             {
@@ -341,7 +337,7 @@ namespace MainForm
             this.WindowState = FormWindowState.Normal;
             this.ShowInTaskbar = true;
             trayIcon.Visible = false;
-            this.Activate(); // Активируем окно
+            this.Activate(); //  
         }
 
         private void MinimizeToTray()
@@ -362,17 +358,17 @@ namespace MainForm
         {
             isExitingFromTray = true;
 
-            // !!! ДОБАВИТЬ ПРОВЕРКУ НА РАБОТУ ПРОЦЕССОВ ПЕРЕД ЗАКРЫТИЕМ !!!
-            // !!! ИНАЧЕ ПИЗДА И ОШИБКА ВСЕМУ НАХУЙ !!!
+            // !!!        !!!
+            // !!!       !!!
 
-            // Корректно закрываем приложение
+            //   
             trayIcon.Visible = false;
             Application.Exit();
         }
 
         private void FormMain_Resize(object sender, EventArgs e)
         {
-            // Сворачиваем в трей при нажатии на кнопку "минус"
+            //        ""
             if (this.WindowState == FormWindowState.Minimized)
             {
                 MinimizeToTray();

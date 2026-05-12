@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -13,6 +13,7 @@ namespace FilePacket
     {
         private UdpClient listener;
         private Dictionary<string, ReceiveState> activeTransfers = new Dictionary<string, ReceiveState>();
+        private readonly Queue<Tuple<string, string>> completedFilesQueue = new Queue<Tuple<string, string>>();
         private bool isRunning = true;
         public StringBuilder ReceivedContent { get; private set; } = new StringBuilder();
         public string CurrentFileName { get; private set; } = "";
@@ -82,6 +83,18 @@ namespace FilePacket
                         if (state.Packets.Count == packet.TotalPackets)
                         {
                             IsComplete = true;
+
+                            // Фиксируем завершенный файл атомарно (имя + полный текст),
+                            // чтобы UI не читал "текущие" данные другого файла.
+                            var completedContent = new StringBuilder();
+                            for (int i = 0; i < state.TotalPackets; i++)
+                            {
+                                if (state.Packets.TryGetValue(i, out byte[] packetBytes))
+                                {
+                                    completedContent.Append(Encoding.UTF8.GetString(packetBytes));
+                                }
+                            }
+                            completedFilesQueue.Enqueue(Tuple.Create(state.FileName, completedContent.ToString()));
                         }
                     }
                 }
@@ -125,9 +138,24 @@ namespace FilePacket
                 }
             }
         }
+
+        public List<Tuple<string, string>> DequeueCompletedFiles()
+        {
+            var result = new List<Tuple<string, string>>();
+            lock (activeTransfers)
+            {
+                while (completedFilesQueue.Count > 0)
+                {
+                    result.Add(completedFilesQueue.Dequeue());
+                }
+            }
+            return result;
+        }
+
         public void ResetReceiver()
         {
             activeTransfers.Clear();
+            completedFilesQueue.Clear();
             ReceivedContent.Clear();
             CurrentFileName = "";
             CurrentPacket = 0;
