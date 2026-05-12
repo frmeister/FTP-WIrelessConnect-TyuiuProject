@@ -28,7 +28,7 @@ namespace MainForm
                 ConfigManager.GetValue("nickName"),
                 ConfigManager.GetValue("dataPath"));
 
-            Task.Run(() => NetworkReciever.Listener());
+            Task.Run(() => NetworkReceiver.Listener());
             Task.Run(() => NetworkController.Is_Online());
 
             Application.Run(new MainForm_Welcome());

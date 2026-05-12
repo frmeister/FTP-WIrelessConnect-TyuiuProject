@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FilePacket\FilePacket.csproj" />
-    <ProjectReference Include="..\FileHandler\FileHandler.csproj" />
-  </ItemGroup>
-	
 </Project>

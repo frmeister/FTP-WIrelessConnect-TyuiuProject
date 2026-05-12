@@ -1,6 +1,7 @@
 using FilePacket;
 using NetworkHandler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -9,6 +10,8 @@ namespace MainForm
     public partial class MainForm_Welcome : Form
     {
         System.Windows.Forms.Timer uiTimer = new System.Windows.Forms.Timer();
+        static System.Windows.Forms.Timer receiveTimer = new System.Windows.Forms.Timer();
+
         public static string openFilePath;
         private FileSender fileSender;
         private FileReceiver fileReceiver;
@@ -37,6 +40,7 @@ namespace MainForm
             uiTimer.Tick += UiTimer_Tick;
             uiTimer.Start();
 
+            NetworkResponser.FileListReceived += NetworkResponser_FileListReceived;
             this.Resize += FormMain_Resize;
 
             openFileDialog.Filter = "Все файлы (*.*)|*.*";
@@ -44,6 +48,8 @@ namespace MainForm
 
             KEY = ConfigManager.GetValue("appKey");
         }
+
+        
 
         #region ELEMENTS
 
@@ -155,7 +161,7 @@ namespace MainForm
             textBoxReceivedContent.Clear();
             labelStatus.Text = "";
             fileReceiver.ResetReceiver();
-            NetworkReciever.Is_ClientReciever = true;
+            NetworkReceiver.Is_ClientReciever = true;
             main_buttonParse.Enabled = true;
             receivedFilesHistory.Clear();
             lastReceivedContent = "";
@@ -175,13 +181,20 @@ namespace MainForm
             form_Settings.ShowDialog();
         }
 
+        private void buttonRequest_Click(object sender, EventArgs e)
+        {
+            NetworkParser.Send_message(IPAddress.Parse(selectedIP), $"ASK_SEND {KEY} {nickName}");
+
+            buttonStats.Enabled = true;
+        }
+
         #endregion
 
         #region EVENTS
 
         private void UiTimer_Tick(object sender, EventArgs e)
         {
-            if (!NetworkReciever.Is_ClientReciever)
+            if (!NetworkReceiver.Is_ClientReciever)
             {
                 main_buttonParse.Enabled = false;
             }
@@ -252,6 +265,39 @@ namespace MainForm
             comboBox_ListIPs.Items.Add("Клинтов нет");
             comboBox_ListIPs.Enabled = false;
 
+        }
+
+        private void NetworkResponser_FileListReceived(IPAddress fromIp, List<string> availableFiles)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => NetworkResponser_FileListReceived(fromIp, availableFiles));
+                return;
+            }
+
+            // Показываем диалог выбора файлов
+            using (var selectForm = new MainForm_ListSelect(availableFiles))
+            {
+                DialogResult res = selectForm.ShowDialog();
+
+                if (res == DialogResult.OK)
+                {
+                    var selected = selectForm.SelectedFiles;
+                    if (selected.Count == 0) return;
+
+                    foreach (string fileName in selected)
+                    {
+                        receiveTimer.Interval = 2000;
+                        receiveTimer.Tick += UiTimer_Tick;
+                        receiveTimer.Start();
+
+                        NetworkParser.Send_message(fromIp, $"REQUEST_FILE {KEY} {nickName} {fileName}");
+                    }
+                    Debug.WriteLine($"Запрошено {selected.Count} файлов у {fromIp}");
+                    receiveTimer.Stop();
+                }
+                else if (res == DialogResult.Cancel) NetworkParser.Send_message(fromIp, $"ECHO_ASK_SEND {KEY} {nickName} CODE_2");
+            }
         }
 
         #endregion
@@ -335,14 +381,5 @@ namespace MainForm
 
         #endregion
 
-
-
-
-        private void buttonRequest_Click(object sender, EventArgs e)
-        {
-            NetworkParser.Send_message(IPAddress.Parse(selectedIP), $"ASK_SEND {KEY} {nickName}");
-
-            buttonStats.Enabled = true;
-        }
     }
 }

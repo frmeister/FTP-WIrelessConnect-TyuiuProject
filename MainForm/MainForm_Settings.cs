@@ -61,6 +61,10 @@ namespace MainForm
         {
             try
             {
+                // Исключаем значения полей none
+                if (settings_textBoxNickname_Input.Text == "none" || settings_textBoxSourceData_Output.Text == "none")
+                    MessageBox.Show("Введите значения в поля", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
                 // Сохраняем ник если он был изменен
                 if (_isNickNameChanged)
                 {
@@ -84,21 +88,19 @@ namespace MainForm
 
         private void settings_buttonSourceData_ChangeDirectory_Click(object sender, EventArgs e)
         {
+            //string selectedPath;
 
+            //openFileDialog1.ShowDialog();
+            //selectedPath = openFileDialog1.FileName;
+
+            //settings_textBoxSourceData_Output.Text = selectedPath;
 
             string selectedPath;
 
-            openFileDialog1.ShowDialog();
-            selectedPath = openFileDialog1.FileName;
+            settings_folderBrowserDialog.ShowDialog();
+            selectedPath = settings_folderBrowserDialog.SelectedPath;
 
             settings_textBoxSourceData_Output.Text = selectedPath;
-
-            //string selectedPath;
-
-            //settings_folderBrowserDialog.ShowDialog();
-            //selectedPath = settings_folderBrowserDialog.SelectedPath;
-
-            //settings_textBoxSourceData_Output.Text = selectedPath;
         }
 
         private void settings_buttonCancel_Click(object sender, EventArgs e)

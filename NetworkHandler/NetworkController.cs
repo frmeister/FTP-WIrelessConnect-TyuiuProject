@@ -20,6 +20,8 @@ namespace NetworkHandler
 
         public static List<IPAddress> old_clients = new List<IPAddress>();
 
+        private static string nickName = NetworkResponser.nickName, appKey = NetworkResponser.appKey;
+
         public static void GetNew_Client(IPAddress ip, string nick)
         {
             lock (clients)
@@ -36,7 +38,7 @@ namespace NetworkHandler
 
         public static void Is_Online()
         {
-            if (!NetworkReciever.Is_ClientReciever)
+            if (!NetworkReceiver.Is_ClientReciever)
             {
                 timer.Elapsed += Timer_Elapsed;
 
@@ -52,14 +54,14 @@ namespace NetworkHandler
             {
                 if (clients.Count == 0) return;
 
-                Debug.WriteLine($"[DEBUG] : Прошел таймер. Проверяю все ли на месте...");
+                Debug.WriteLine($"[Controller] : Прошел таймер. Проверяю все ли на месте...");
 
                 NetworkResponser.connected_clients.Clear();
 
                 foreach (IPAddress ip in clients)
                 {
 
-                    NetworkParser.Send_message(ip, "CHECK WRLSCONNECT_123");
+                    NetworkParser.Send_message(ip, $"CHECK {appKey} {nickName}");
 
                 }
             }
@@ -67,7 +69,7 @@ namespace NetworkHandler
 
             Is_Connected();
 
-            Debug.WriteLine($"[DEBUG] : Проверка прошла!");
+            Debug.WriteLine($"[Controller] : Проверка прошла!");
         }
 
         public static void Is_Connected()

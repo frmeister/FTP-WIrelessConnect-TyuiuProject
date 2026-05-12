@@ -25,7 +25,7 @@ namespace NetworkHandler
             byte[] data = Encoding.UTF8.GetBytes(msg);
             sender.EnableBroadcast = false;
 
-            Debug.WriteLine($"[DEBUG] : Отправляяю {msg} на адрес {ip.ToString()}");
+            Debug.WriteLine($"[ConnectionEstablisher] : Отправляю {msg} на адрес {ip.ToString()}");
 
             sender.Send(data, data.Length, ip.ToString(), port);
         }

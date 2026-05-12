@@ -10,7 +10,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		1 зима середина.TXT = 1 зима середина.TXT
-		Config.cfg = Config.cfg
 		Objects.txt = Objects.txt
 		FilePacket\PacketSerializer.cs = FilePacket\PacketSerializer.cs
 	EndProjectSection
@@ -20,6 +19,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilePacket", "FilePacket\FilePacket.csproj", "{30AC4EC8-1573-4FB4-A899-B2477401E558}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkHandler", "NetworkHandler\NetworkHandler.csproj", "{DF380FA2-4023-AD83-B921-897CCA273F9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileHandler", "FileHandler\FileHandler.csproj", "{7947EE27-285D-4130-A8BC-119012ADC322}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,15 +40,19 @@ Global
 		{DF380FA2-4023-AD83-B921-897CCA273F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF380FA2-4023-AD83-B921-897CCA273F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF380FA2-4023-AD83-B921-897CCA273F9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7947EE27-285D-4130-A8BC-119012ADC322}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7947EE27-285D-4130-A8BC-119012ADC322}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7947EE27-285D-4130-A8BC-119012ADC322}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7947EE27-285D-4130-A8BC-119012ADC322}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{02EA681E-C7D8-13C7-8484-4AC65E1B71E8} = {16F4CD79-8ED4-43C7-ADE2-FC10ADB75C6A}
 		{D9645D8C-486D-457B-B3B4-FD67183A14F5} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{30AC4EC8-1573-4FB4-A899-B2477401E558} = {16F4CD79-8ED4-43C7-ADE2-FC10ADB75C6A}
 		{DF380FA2-4023-AD83-B921-897CCA273F9B} = {16F4CD79-8ED4-43C7-ADE2-FC10ADB75C6A}
+		{7947EE27-285D-4130-A8BC-119012ADC322} = {16F4CD79-8ED4-43C7-ADE2-FC10ADB75C6A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CC64A474-6111-4191-A6E2-3786E36C0AD8}

@@ -9,15 +9,14 @@ using System.Threading.Tasks;
 
 namespace NetworkHandler
 {
-    public class NetworkReciever
+    public class NetworkReceiver
     {
-        // Debug.WriteLine($"[DEBUG] : ///");
         private static readonly HashSet<IPAddress> _localAddresses = new();
 
         public static bool Is_ClientReciever = true;
         public static bool IsRunning = true;
 
-        static NetworkReciever()
+        static NetworkReceiver()
         {
 
             RefreshLocalAddresses();
@@ -31,7 +30,7 @@ namespace NetworkHandler
             UdpClient listener = new UdpClient(port);
             listener.EnableBroadcast = true;
 
-            Debug.WriteLine($"[DEBUG] : Слушаю UDP порт {port}...");
+            Debug.WriteLine($"[Reciever] : Слушаю UDP порт {port}...");
 
             while (IsRunning)
             {
@@ -43,17 +42,17 @@ namespace NetworkHandler
 
                     if (IsLocalAddress(remote.Address))
                     {
-                        Debug.WriteLine($"[DEBUG] : Пропускаю свой пакет: {msg}");
+                        Debug.WriteLine($"[Reciever] : Пропускаю свой пакет: {msg}");
                         continue;
                     }
 
-                    Debug.WriteLine($"[DEBUG] : Получено от {remote.Address}: {msg}");
+                    Debug.WriteLine($"[Reciever] : Получено от {remote.Address}: {msg}");
 
                     NetworkResponser.Echo(remote.Address, msg);
                 }
                 catch (SocketException)
                 {
-                    Debug.WriteLine($"[DEBUG] : Ошибка в прослушивании... ");
+                    Debug.WriteLine($"[Reciever] : Ошибка в прослушивании... ");
                 }
             }
         }
