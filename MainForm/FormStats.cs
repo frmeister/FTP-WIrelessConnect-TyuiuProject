@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Text.RegularExpressions;
 
 namespace MainForm
 {
@@ -12,6 +13,23 @@ namespace MainForm
     {
         private List<FileData> filesData = new List<FileData>();
         private bool isCompareMode = false;
+        private readonly Color[] pointColors = new Color[]
+        {
+            Color.Blue, Color.Red, Color.Green, Color.Orange, Color.Purple, Color.Brown,
+            Color.Cyan, Color.Magenta, Color.DarkBlue, Color.DarkRed, Color.DarkGreen,
+            Color.DarkOrange, Color.DarkViolet, Color.HotPink, Color.Teal, Color.Olive
+        };
+        private readonly Color[] fileColors = new Color[]
+        {
+            Color.Blue, Color.Red, Color.Green, Color.Orange, Color.Purple, Color.Brown,
+            Color.Cyan, Color.Magenta, Color.DarkBlue, Color.DarkRed, Color.DarkGreen,
+            Color.DarkOrange, Color.DarkViolet, Color.HotPink, Color.Teal, Color.Olive
+        };
+        private readonly ChartDashStyle[] lineStyles = new ChartDashStyle[]
+        {
+            ChartDashStyle.Solid, ChartDashStyle.Dash, ChartDashStyle.Dot,ChartDashStyle.DashDot, ChartDashStyle.DashDotDot  
+        };
+
         private class FileData
         {
             public string FileName { get; set; }
@@ -33,22 +51,10 @@ namespace MainForm
             if (numericMaxMeasurements != null)
             {
                 numericMaxMeasurements.Minimum = 10;
-                numericMaxMeasurements.Maximum = 1000;  
+                numericMaxMeasurements.Maximum = 1000;
                 numericMaxMeasurements.Value = 100;
                 numericMaxMeasurements.ValueChanged += (s, e) =>
                 {
-                    if (numericMaxMeasurements.Value > 100)
-                    {
-                        ca.AxisX.Interval = 5;
-                    }
-                    if (numericMaxMeasurements.Value > 250)
-                    {
-                        ca.AxisX.Interval = 10;
-                    }
-                    if (numericMaxMeasurements.Value > 500)
-                    {
-                        ca.AxisX.Interval = 20;
-                    }
                     if (!isCompareMode)
                         UpdateChart();
                 };
@@ -71,6 +77,7 @@ namespace MainForm
                 ca.AxisX.LabelStyle.Angle = -45;
             }
         }
+
         public void AddFileData(string data, string fileName)
         {
             if (string.IsNullOrEmpty(data) || data.Length < 100)
@@ -78,7 +85,6 @@ namespace MainForm
                 MessageBox.Show($"Файл {fileName} пуст или слишком мал!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             var parsed = ParseData(data);
             parsed.FileName = fileName;
             filesData.Add(parsed);
@@ -88,7 +94,11 @@ namespace MainForm
                 if (comboBoxFiles.Items.Count == 1)
                     comboBoxFiles.SelectedIndex = 0;
             }
-            MessageBox.Show($"Добавлен файл: {fileName}\nИзмерений: {parsed.Times.Count}",  "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (checkedListBoxFiles != null)
+            {
+                checkedListBoxFiles.Items.Add(fileName, false);
+            }
+            MessageBox.Show($"Добавлен файл: {fileName}\nИзмерений: {parsed.Times.Count}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private FileData ParseData(string data)
@@ -99,16 +109,13 @@ namespace MainForm
                 PointsValues = new List<List<double>>(),
                 AvgByPoint = new double[16]
             };
-
             for (int i = 0; i < 16; i++)
                 result.PointsValues.Add(new List<double>());
             var lines = data.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
             foreach (var line in lines)
             {
                 if (line.Contains("Протокол") || line.Contains("прибором") || line.Contains("°C"))
                     continue;
-
                 if (!line.Contains(":")) continue;
                 var parts = Regex.Split(line.Trim(), @"\s+");
                 if (parts.Length >= 2 && parts[0].Contains(":"))
@@ -126,7 +133,6 @@ namespace MainForm
                                 startIdx++;
                         }
                     }
-
                     for (int i = 0; i < 16 && startIdx + i < parts.Length; i++)
                     {
                         double value = 0;
@@ -139,7 +145,6 @@ namespace MainForm
                     }
                 }
             }
-
             double totalSum = 0;
             for (int point = 0; point < 16; point++)
             {
@@ -152,62 +157,83 @@ namespace MainForm
             return result;
         }
 
+        private void ConfigureAxisX(ChartArea ca, int dataCount)
+        {
+            if (dataCount <= 20)
+                ca.AxisX.Interval = 1;
+            else if (dataCount <= 50)
+                ca.AxisX.Interval = 2;
+            else if (dataCount <= 100)
+                ca.AxisX.Interval = 5;
+            else if (dataCount <= 200)
+                ca.AxisX.Interval = 10;
+            else if (dataCount <= 500)
+                ca.AxisX.Interval = 20;
+            else
+                ca.AxisX.Interval = 40;
+
+            if (ca.AxisX.Interval <= 2)
+                ca.AxisX.LabelStyle.Angle = -45;
+            else if (ca.AxisX.Interval <= 10)
+                ca.AxisX.LabelStyle.Angle = -60;
+            else
+                ca.AxisX.LabelStyle.Angle = -90;
+        }
+
         private void UpdateChart()
         {
             if (comboBoxFiles == null || comboBoxFiles.SelectedIndex < 0) return;
             if (filesData.Count == 0) return;
             if (checkedListPoints == null) return;
-
             chartData.Series.Clear();
             var data = filesData[comboBoxFiles.SelectedIndex];
-
             var selectedPoints = new List<int>();
             for (int i = 0; i < checkedListPoints.Items.Count; i++)
             {
                 if (checkedListPoints.GetItemChecked(i))
                     selectedPoints.Add(i);
             }
-
             if (selectedPoints.Count == 0)
             {
                 MessageBox.Show("Выберите хотя бы одну точку для отображения!");
                 return;
             }
-
             int maxMeasurements = data.PointsValues[0].Count;
             if (numericMaxMeasurements != null)
                 maxMeasurements = Math.Min((int)numericMaxMeasurements.Value, data.PointsValues[0].Count);
+            var ca = chartData.ChartAreas[0];
+            ConfigureAxisX(ca, maxMeasurements);
             double minY = double.MaxValue, maxY = double.MinValue;
-
+            int pointIdx_counter = 0;
             foreach (int pointIndex in selectedPoints)
             {
                 var series = new Series
                 {
                     Name = checkedListPoints.Items[pointIndex].ToString(),
                     ChartType = SeriesChartType.Line,
-                    BorderWidth = 2
+                    BorderWidth = 2,
+                    Color = pointColors[pointIdx_counter % pointColors.Length],
+                    BorderDashStyle = ChartDashStyle.Solid 
                 };
-
                 var values = data.PointsValues[pointIndex];
                 for (int t = 0; t < maxMeasurements && t < values.Count; t++)
                 {
                     string time = t < data.Times.Count ? data.Times[t] : "";
-
                     int pointIdx = series.Points.AddXY(t, values[t]);
-                    series.Points[pointIdx].AxisLabel = time;  
+                    series.Points[pointIdx].AxisLabel = time;
                     series.Points[pointIdx].ToolTip = $"{data.FileName}\nВремя: {time}\nТемпература: {values[t]:F2}°C";
                     if (values[t] < minY) minY = values[t];
                     if (values[t] > maxY) maxY = values[t];
                 }
                 chartData.Series.Add(series);
+                pointIdx_counter++;
             }
-
             if (chartData.Series.Count > 0 && maxY > minY)
             {
                 double padding = (maxY - minY) * 0.1;
                 if (padding == 0) padding = 1;
-                chartData.ChartAreas[0].AxisY.Minimum = minY - padding;
-                chartData.ChartAreas[0].AxisY.Maximum = maxY + padding;
+                ca.AxisY.Minimum = minY - padding;
+                ca.AxisY.Maximum = maxY + padding;
             }
             chartData.Titles.Clear();
             chartData.Titles.Add($"{data.FileName} - первые {maxMeasurements} измерений");
@@ -231,12 +257,19 @@ namespace MainForm
                     "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-
-            if (comboBoxFiles.SelectedIndex < 0) return;
-            int file1Index = comboBoxFiles.SelectedIndex;
-            int file2Index = (file1Index + 1) % filesData.Count;
-            var file1 = filesData[file1Index];
-            var file2 = filesData[file2Index];
+            List<FileData> selectedFiles = new List<FileData>();
+            for (int i = 0; i < checkedListBoxFiles.CheckedItems.Count; i++)
+            {
+                string fileName = checkedListBoxFiles.CheckedItems[i].ToString();
+                FileData file = filesData.FirstOrDefault(f => f.FileName == fileName);
+                if (file != null)
+                    selectedFiles.Add(file);
+            }
+            if (selectedFiles.Count < 2)
+            {
+                MessageBox.Show("Выберите минимум 2 файла для сравнения в списке файлов!");
+                return;
+            }
             var selectedPoints = new List<int>();
             for (int i = 0; i < checkedListPoints.Items.Count; i++)
             {
@@ -248,73 +281,69 @@ namespace MainForm
                 MessageBox.Show("Выберите точки для сравнения!");
                 return;
             }
-
             isCompareMode = true;
             chartData.Series.Clear();
             var ca = chartData.ChartAreas[0];
             ca.AxisX.Title = "Номер измерения";
             ca.AxisY.Title = "Температура, °C";
-            ca.AxisX.LabelStyle.Angle = -90; 
-            ca.AxisX.Interval = 5;
-
-            int maxMeasurements = Math.Min(50, Math.Min(file1.PointsValues[0].Count, file2.PointsValues[0].Count));
+            int maxMeasurements = selectedFiles.Min(f => f.PointsValues[0].Count);
+            maxMeasurements = Math.Min((int)numericMaxMeasurements.Value, maxMeasurements);
+            ConfigureAxisX(ca, maxMeasurements);
             double minY = double.MaxValue, maxY = double.MinValue;
-            foreach (int pointIndex in selectedPoints)
+            int fileIndex = 0;
+
+            foreach (var file in selectedFiles)
             {
-                string pointName = checkedListPoints.Items[pointIndex].ToString();
-                var series1 = new Series
-                {
-                    Name = $"{file1.FileName} - {pointName}",
-                    ChartType = SeriesChartType.Line,
-                    BorderWidth = 2,
-                    Color = System.Drawing.Color.Blue
-                };
-                var series2 = new Series
-                {
-                    Name = $"{file2.FileName} - {pointName}",
-                    ChartType = SeriesChartType.Line,
-                    BorderWidth = 2,
-                    Color = System.Drawing.Color.Red,
-                    BorderDashStyle = ChartDashStyle.Dash
-                };
+                Color fileColor = fileColors[fileIndex % fileColors.Length];
+                int pointIndexInFile = 0;
 
-                var values1 = file1.PointsValues[pointIndex];
-                var values2 = file2.PointsValues[pointIndex];
-
-                for (int t = 0; t < maxMeasurements; t++)
+                foreach (int pointIndex in selectedPoints)
                 {
-                    string time1 = t < file1.Times.Count ? file1.Times[t] : "";
-                    string time2 = t < file2.Times.Count ? file2.Times[t] : "";
-                    if (t < values1.Count)
+                    string pointName = checkedListPoints.Items[pointIndex].ToString();
+                    var series = new Series
                     {
-                        int pointIndex1 = series1.Points.AddXY(t, values1[t]);
-                        series1.Points[pointIndex1].AxisLabel = time1;
-                        series1.Points[pointIndex1].ToolTip = $"{file1.FileName}\nВремя: {time1}\nТемпература: {values1[t]:F2}°C";
-                    }
+                        Name = $"{file.FileName} - {pointName}",
+                        ChartType = SeriesChartType.Line,
+                        BorderWidth = 2,
+                        Color = fileColor,
+                        BorderDashStyle = lineStyles[pointIndexInFile % lineStyles.Length] 
+                    };
 
-                    if (t < values2.Count)
+                    var values = file.PointsValues[pointIndex];
+                    for (int t = 0; t < maxMeasurements && t < values.Count; t++)
                     {
-                        int pointIndex2 = series2.Points.AddXY(t, values2[t]);
-                        series2.Points[pointIndex2].AxisLabel = time2;
-                        series2.Points[pointIndex2].ToolTip = $"{file2.FileName}\nВремя: {time2}\nТемпература: {values2[t]:F2}°C";
+                        string time = t < file.Times.Count ? file.Times[t] : "";
+                        int pointIdx = series.Points.AddXY(t, values[t]);
+                        if (!string.IsNullOrEmpty(time))
+                            series.Points[pointIdx].AxisLabel = time;
+                        series.Points[pointIdx].ToolTip = $"{file.FileName}\nТочка: {pointName}\nВремя: {time}\nТемпература: {values[t]:F2}°C";
+
+                        if (values[t] < minY) minY = values[t];
+                        if (values[t] > maxY) maxY = values[t];
                     }
-                    if (t < values1.Count && values1[t] < minY) minY = values1[t];
-                    if (t < values1.Count && values1[t] > maxY) maxY = values1[t];
-                    if (t < values2.Count && values2[t] < minY) minY = values2[t];
-                    if (t < values2.Count && values2[t] > maxY) maxY = values2[t];
+                    chartData.Series.Add(series);
+                    pointIndexInFile++;
                 }
-                chartData.Series.Add(series1);
-                chartData.Series.Add(series2);
+                fileIndex++;
             }
-
             if (maxY > minY)
             {
                 double padding = (maxY - minY) * 0.1;
+                if (padding == 0) padding = 1;
                 ca.AxisY.Minimum = minY - padding;
                 ca.AxisY.Maximum = maxY + padding;
             }
+            string title = "Сравнительный анализ: ";
+            for (int i = 0; i < selectedFiles.Count; i++)
+            {
+                title += selectedFiles[i].FileName;
+                if (i < selectedFiles.Count - 1)
+                    title += " vs ";
+            }
             chartData.Titles.Clear();
-            chartData.Titles.Add($"Сравнение: {file1.FileName} (синий) vs {file2.FileName} (красный)");
+            chartData.Titles.Add(title);
+            chartData.Legends[0].Docking = Docking.Top;
+            chartData.Legends[0].Alignment = StringAlignment.Center;
 
             if (comboBoxFiles != null) comboBoxFiles.Enabled = false;
             if (checkedListPoints != null) checkedListPoints.Enabled = false;
@@ -324,13 +353,11 @@ namespace MainForm
         {
             if (chartData.Series.Count == 0)
             {
-                MessageBox.Show("Нет графика для сохранения!", "Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Нет графика для сохранения!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
             SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "PNG изображение|*.png|JPEG изображение|*.jpg|BMP изображение|*.bmp";
+            saveDialog.Filter = "PNG изображение|*.png";
             saveDialog.Title = "Сохранить график";
             saveDialog.FileName = $"График_{DateTime.Now:yyyyMMdd_HHmmss}.png";
 
@@ -338,18 +365,12 @@ namespace MainForm
             {
                 try
                 {
-                    int width = chartData.Width;
-                    int height = chartData.Height;
-                    using (System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(width, height))
-                    {
-                        chartData.DrawToBitmap(bitmap, new System.Drawing.Rectangle(0, 0, width, height));
-                        bitmap.Save(saveDialog.FileName);
-                    }
+                    chartData.SaveImage(saveDialog.FileName, ChartImageFormat.Png);
                     MessageBox.Show($"График сохранен!\nПуть: {saveDialog.FileName}", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка",    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Ошибка сохранения: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
