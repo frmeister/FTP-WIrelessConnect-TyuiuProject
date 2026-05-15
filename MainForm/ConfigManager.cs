@@ -49,6 +49,73 @@ namespace MainForm
 
         static private Dictionary<string, string> _config;
 
+        /// <summary>Базовые пары ключ–значение: дополняют файл при отсутствии ключей и приводят strategy к допустимому виду.</summary>
+        private static IReadOnlyDictionary<string, string> GetDefaultEntries() =>
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "dataPath", "none" },
+                { "nickName", "none" },
+                { "appKey", "WRLSCONNECT_123" },
+                { "strategy", "default" },
+            };
+
+        private static void MergeMissingDefaultsAndNormalize()
+        {
+            var defaults = GetDefaultEntries();
+            bool changed = false;
+
+            // Старый ключ с опечаткой: переносим в strategy, только если strategy ещё не задан
+            if (_config.TryGetValue("startegy", out var legacy))
+            {
+                if (!_config.TryGetValue("strategy", out var existingStrategy) || string.IsNullOrWhiteSpace(existingStrategy))
+                {
+                    _config["strategy"] = NormalizeStrategyValue(legacy);
+                    changed = true;
+                }
+            }
+
+            foreach (var kv in defaults)
+            {
+                if (!_config.TryGetValue(kv.Key, out var existing) || string.IsNullOrWhiteSpace(existing))
+                {
+                    _config[kv.Key] = kv.Value;
+                    changed = true;
+                }
+            }
+
+            if (_config.TryGetValue("strategy", out var rawStrategy))
+            {
+                string normalized = NormalizeStrategyValue(rawStrategy);
+                if (!string.Equals(rawStrategy, normalized, StringComparison.Ordinal))
+                {
+                    _config["strategy"] = normalized;
+                    changed = true;
+                }
+            }
+
+            if (changed)
+                SaveConfig();
+        }
+
+        /// <summary>Допустимые значения: default, cloud (в файле — в нижнем регистре).</summary>
+        private static string NormalizeStrategyValue(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return "default";
+
+            var t = value.Trim();
+            if (t.Equals("default", StringComparison.OrdinalIgnoreCase))
+                return "default";
+            if (t.Equals("cloud", StringComparison.OrdinalIgnoreCase))
+                return "cloud";
+
+            // Частые ошибки: в конфиг попал индекс из UI ("0"/"1") вместо имени режима
+            if (t == "0" || t == "1")
+                return "default";
+
+            return "default";
+        }
+
         // Инициализруем конфиг если он еще не загружен
         static public void Initialize(string appDirectory = null)
         {
@@ -81,6 +148,7 @@ namespace MainForm
                     {
                         Debug.WriteLine($"[ConfigManager] Загружаем конфиг из: {cfgDirectory}");
                         LoadConfigFromFile();
+                        MergeMissingDefaultsAndNormalize();
                     }
                 }
                 catch (Exception ex)
@@ -88,17 +156,17 @@ namespace MainForm
                     Debug.WriteLine($"[ConfigManager] Ошибка инициализации: {ex.Message}");
                     CreateDefaultConfig();
                 }
+
+                // Раньше флаг не выставлялся — из-за этого каждый GetValue считал конфиг «неинициализированным».
+                _isInitialized = true;
             }
         }
 
         static private void CreateDefaultConfig()
         {
-            _config = new Dictionary<string, string>
-            {
-                { "dataPath", "none" },
-                { "nickName", "none" },
-                { "appKey", "WRLSCONNECT_123"}
-            };
+            _config = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in GetDefaultEntries())
+                _config[kv.Key] = kv.Value;
             SaveConfig();
         }
 
@@ -148,6 +216,8 @@ namespace MainForm
 
             lock (_lock)
             {
+                if (key.Equals("strategy", StringComparison.OrdinalIgnoreCase))
+                    value = NormalizeStrategyValue(value);
                 _config[key] = value;
                 SaveConfig();
             }
@@ -156,10 +226,7 @@ namespace MainForm
         static public string GetValue(string key, string defaultValue = "")
         {
             if (!_isInitialized)
-            {
-                Debug.WriteLine($"[ConfigManager] Конфиг не был иницилазирован при получении: {key}");
                 Initialize();
-            }
 
             lock (_lock)
             {

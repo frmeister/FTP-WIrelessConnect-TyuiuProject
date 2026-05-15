@@ -28,8 +28,18 @@ namespace MainForm
                 ConfigManager.GetValue("nickName"),
                 ConfigManager.GetValue("dataPath"));
 
-            Task.Run(() => NetworkReceiver.Listener());
-            Task.Run(() => NetworkController.Is_Online());
+            // :: Configuration starter ::
+            // 
+
+            string method = ConfigManager.GetValue("strategy"); // Getting strategy method
+
+            if (method == "default") // default = UDP standart
+            {
+                Task.Run(() => NetworkReceiver.Listener());
+                Task.Run(() => NetworkController.Is_Online());
+            }
+
+            if (method == "cloud") { } // cloud = Yandex Disk (Cloud) — заглушка
 
             Application.Run(new MainForm_Welcome());
         }

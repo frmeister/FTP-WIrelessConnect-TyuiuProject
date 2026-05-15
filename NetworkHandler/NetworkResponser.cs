@@ -1,15 +1,9 @@
 using FilePacket;
 using FileHandler;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 /*
     Логика обращений с сообщениями:
@@ -34,37 +28,24 @@ namespace NetworkHandler
     {
         public static List<IPAddress> connected_clients = new List<IPAddress>();
 
-        static private List<string> ListOfFiles;
-        private static List<string> ReceivedList = new List<string>();
+        public static FileTransferManager TransferManager { get; private set; }
+        public static event Action<IPAddress, string, bool>? FileConfirmationReceived;
+
+        internal static List<string>? ListOfFiles;
+        internal static List<string> ReceivedList = new List<string>();
         public static bool _isClientReceiver = false;
 
         public static event Action<IPAddress, List<string>>? FileListReceived;
 
         public static int SendAskedStatus = 0; // 0 - Neutral, 1 - Error, 2 - OK
 
-        private static string content, param, FileDir;
+        private static string content;
+        internal static string param;
+        internal static string FileDir;
         public static string nickName_Recieved, appKey, nickName;
 
         static FileBrowser fileBrowser = new FileBrowser();
-        static FileSender fs = new FileSender();
-
-        private static bool TryExtractParam(string msg, out string extractedParam)
-        {
-            extractedParam = string.Empty;
-            if (string.IsNullOrWhiteSpace(msg))
-                return false;
-
-            // Команда имеет формат: TYPE KEY NICK [PARAM...]
-            // KEY может быть пустым (в сообщении появятся двойные пробелы),
-            // поэтому НЕ удаляем пустые элементы.
-            // Берем все, что идет после третьего токена, включая пробелы в имени файла.
-            string[] parts = msg.Split(new[] { ' ' }, 4, StringSplitOptions.None);
-            if (parts.Length < 4)
-                return false;
-
-            extractedParam = parts[3].Trim();
-            return !string.IsNullOrEmpty(extractedParam);
-        }
+        internal static FileSender fs = new FileSender();
 
         public static void Initialize(string value_appkey, string value_nickname, string value_FileDir)
         {
@@ -78,15 +59,40 @@ namespace NetworkHandler
                 ListOfFiles = fileBrowser.ListOfReqFiles(FileDir);
             else Debug.WriteLine("[NetworkResponser] : Невозможно получить адрес директории!");
 
-                Debug.WriteLine($"[NetworkResponser] ------------------------------------");
+            TransferManager = new FileTransferManager(appKey);
+
+            // Подписываем TransferManager на событие подтверждения
+            FileConfirmationReceived += (remote, fileName, success) =>
+            {
+                TransferManager.ConfirmFromReceiver(fileName, success);
+            };
+
+            TransferManager.SendMessageRequested += (remote, msg) =>
+            {
+                NetworkParser.Send_message(remote, msg);
+            };
+            TransferManager.FileSentSuccessfully += (filePath) =>
+            {
+                Debug.WriteLine($"[NetworkResponser] Файл успешно отправлен и подтверждён: {filePath}");
+            };
+
+            Debug.WriteLine($"[NetworkResponser] ------------------------------------");
             Debug.WriteLine($"[NetworkResponser] Текущий ключ: {appKey}");
             Debug.WriteLine($"[NetworkResponser] Ник: {nickName}");
             Debug.WriteLine($"[NetworkResponser] ------------------------------------");
         }
 
+        internal static void RaiseFileListReceived(IPAddress remote, List<string> files) =>
+            FileListReceived?.Invoke(remote, files);
+
+        internal static void RaiseFileConfirmationReceived(IPAddress remote, string fileName, bool success)
+        {
+            FileConfirmationReceived?.Invoke(remote, fileName, success);
+        }
+
         public static void Echo(IPAddress remote, string msg)
         {
-            string[] lines = msg.Split(' ');
+            string[] lines = NetworkEchoMessageParser.SplitMessageTokens(msg);
 
             bool _isMessageCorrect = true, _postfixExists = false;
 
@@ -113,183 +119,51 @@ namespace NetworkHandler
             switch (TYPE)
             {
                 case "HELLO":
-                    if (!_isClientReceiver)
-                    {
-                        Debug.WriteLine($"[NetworkResponser] Отправляю ответ на HELLO...");
-                        NetworkParser.Send_message(remote, $"ECHO_HELLO {appKey} {nickName}"); 
-                        NetworkController.GetNew_Client(remote, nickName_Recieved);
-
-                        _isClientReceiver = true;
-                    }
+                    NetworkResponserEchoHandlers.HandleHello(remote);
                     break;
-
 
                 case "ECHO_HELLO":
-                    if (!NetworkController.clients.Contains(remote))
-                    {
-                        NetworkController.GetNew_Client(remote, nickName_Recieved);
-                    }
+                    NetworkResponserEchoHandlers.HandleEchoHello(remote);
                     break;
-
 
                 case "CHECK":
-                    NetworkParser.Send_message(remote, $"ECHO_CHECK {appKey} {nickName}");
-                    lock (connected_clients)
-                    {
-                        connected_clients.Add(remote);
-                    }
+                    NetworkResponserEchoHandlers.HandleCheck(remote);
                     break;
-
 
                 case "ECHO_CHECK":
-                    lock (connected_clients)
-                    {
-                        connected_clients.Add(remote);
-                    }
+                    NetworkResponserEchoHandlers.HandleEchoCheck(remote);
                     break;
-
 
                 case "ASK_SEND":
-
-                    IPAddress targetIp;
-                    
-                    fs = new FileSender();
-
-                    Debug.WriteLine($"[ASK_SEND] ListOfFiles.Count = {ListOfFiles.Count}");
-                    foreach (var f in ListOfFiles) Debug.WriteLine($"  - {f}");
-
-                    // Если файлов 0
-                    if (ListOfFiles.Count == 0) {
-                        if (NetworkController.dClients.TryGetValue(nickName_Recieved, out IPAddress value))
-                        {
-                            targetIp = value;
-
-                            NetworkParser.Send_message(targetIp, $"ECHO_ASK_SEND {appKey} {nickName} CODE_1");
-
-                            break;
-                        }
-                        else; }
-
-                    // Если в директории существует всего один файл
-                    else if (ListOfFiles.Count == 1)
-                    {
-                        if (NetworkController.dClients.TryGetValue(nickName_Recieved, out IPAddress value))
-                        {
-                            targetIp = value;
-
-                            string fullPath = Path.Combine(FileDir, ListOfFiles[0]);
-
-                            Task.Run(() => fs.SendAskedFile(fullPath, targetIp, 8889));
-
-                            break;
-                        }
-                    }
-
-                    // Если их много
-                    else
-                    {
-                        if (NetworkController.dClients.TryGetValue(nickName_Recieved, out IPAddress value))
-                        {
-                            targetIp = value;
-
-                            // int fileCount = ListOfFiles.Count, counter = 0;  - Счетчик файлов, пока нет применения
-
-                            NetworkParser.Send_message(targetIp, $"ECHO_ASK_SEND {appKey} {nickName} LIST_START");
-
-                            foreach (var name in ListOfFiles)
-                            {
-                                NetworkParser.Send_message(targetIp, $"ECHO_ASK_SEND {appKey} {nickName} {name}");
-                            }
-
-                            NetworkParser.Send_message(targetIp, $"ECHO_ASK_SEND {appKey} {nickName} LIST_END");
-
-                            break;
-                        }
-                    }
-
+                    NetworkResponserEchoHandlers.HandleAskSend(remote);
                     break;
 
-
-                // Эхо запрашиваемого файла
                 case ("ECHO_ASK_SEND"):
-
-                    //// Error Handler
-                    //if (content == "CODE_1") { SendAskedStatus = 1; break; }
-
-                    //if (content == "CODE_2") { SendAskedStatus = 1; break; }
-
-                    //if (content != "LIST_START" && content != "LIST_END") { ReceivedList.Add(content); break; }
-
-                    //if (content == "LIST_START") { ReceivedList = new List<string>(); break; }
-
-                    //if (content == "LIST_END") { SendAskedStatus = 2; FileListReceived?.Invoke(remote, ReceivedList ?? new List<string>()); break; }
-
-                    //else break;
-
-                    {
-                        // Формат: ECHO_ASK_SEND {appKey} {nickName} [параметр]
-                        // Параметр может содержать пробелы (имя файла).
-                        if (!TryExtractParam(msg, out param))
-                        {
-                            Debug.WriteLine($"[ECHO_ASK_SEND] Не удалось извлечь параметр из: '{msg}'");
-                            break;
-                        }
-
-                        Debug.WriteLine($"[ECHO_ASK_SEND] param = '{param}'");
-
-                        if (param == "CODE_1" || param == "CODE_2")
-                        {
-                            SendAskedStatus = (param == "CODE_1") ? 1 : 2;
-                            break;
-                        }
-                        if (param == "LIST_START")
-                        {
-                            ReceivedList = new List<string>();
-                            Debug.WriteLine("[ECHO_ASK_SEND] LIST_START, список очищен");
-                            break;
-                        }
-                        if (param == "LIST_END")
-                        {
-                            SendAskedStatus = 2;
-                            Debug.WriteLine($"[ECHO_ASK_SEND] LIST_END, список содержит {ReceivedList.Count} файлов");
-                            FileListReceived?.Invoke(remote, ReceivedList ?? new List<string>());
-                            break;
-                        }
-                        // Иначе это имя файла
-                        ReceivedList.Add(param);
-                        Debug.WriteLine($"[ECHO_ASK_SEND] Добавлен файл: {param}, теперь в списке {ReceivedList.Count}");
-                        break;
-                    }
-
+                    NetworkResponserEchoHandlers.HandleEchoAskSend(remote, msg);
+                    break;
 
                 case ("REQUEST_FILE"):
+                    NetworkResponserEchoHandlers.HandleRequestFile(remote, msg);
+                    break;
 
-                    fs = new FileSender();
+                case ("FILE_SENT_OK"):
+                    NetworkResponserEchoHandlers.HandleFileSent_Ok(remote, msg);
+                    break;
 
-                    if (NetworkController.dClients.TryGetValue(nickName_Recieved, out IPAddress reqValue))
-                    {
-                        targetIp = reqValue;
-
-                        if (!TryExtractParam(msg, out param))
-                        {
-                            Debug.WriteLine($"[REQUEST_FILE] Не удалось извлечь имя файла из: '{msg}'");
-                            break;
-                        }
-
-                        string fullPath = Path.Combine(FileDir, param);
-
-                        // Важно отправлять запрошенные файлы последовательно,
-                        // иначе пакеты разных файлов могут перемешаться по времени.
-                        fs.SendAskedFile(fullPath, targetIp, 8889).GetAwaiter().GetResult();
-
-                        break;
-                    }
+                case ("FILE_SENT_ERROR"):
 
                     break;
 
-                // Лог случайного пакета
+                case ("ECHO_FILE_SENT_OK"):
+                    NetworkResponserEchoHandlers.HandleEchoFileSentOk(remote, msg);
+                    break;
+
+                case ("ECHO_FILE_SENT_ERROR"):
+                    NetworkResponserEchoHandlers.HandleEchoFileSentError(remote, msg);
+                    break;
+
                 default:
-                    Debug.WriteLine($"[NetworkResponser] : Неизвестный пакет от {remote}: {msg}");
+                    NetworkResponserEchoHandlers.HandleUnknown(remote, msg);
                     break;
             }
         }

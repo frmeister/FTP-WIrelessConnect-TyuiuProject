@@ -34,6 +34,10 @@ namespace MainForm
 
         private void InfoInit()
         {
+            // Инициализация списка checkedBoxList
+            settings_checkedBoxListStartegy.SetItemChecked(0, false);
+            settings_checkedBoxListStartegy.SetItemChecked(1, false);
+
             // Загрузка ника
             if (!string.IsNullOrEmpty(nickName))
                 settings_textBoxNickname_Input.Text = nickName;
@@ -43,6 +47,13 @@ namespace MainForm
                 settings_textBoxSourceData_Output.Text = folderPath;
             else
                 settings_textBoxSourceData_Output.Text = "Путь не установлен";
+
+            // Загрузка стратегии (только отображение; выбор отключён — правка в Config.cfg или через будущий UI)
+            string strategy = ConfigManager.GetValue("strategy");
+
+            if (strategy == "default") settings_checkedBoxListStartegy.SetItemChecked(0, true);
+            else if (strategy == "cloud") settings_checkedBoxListStartegy.SetItemChecked(1, true);
+
         }
 
         private void settings_textBoxNickname_Input_TextChanged(object sender, EventArgs e)
@@ -109,6 +120,7 @@ namespace MainForm
         }
 
         #endregion
+
 
     }
 }
